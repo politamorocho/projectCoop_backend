@@ -39,8 +39,20 @@ export class SuspensionController {
     }
   }
 
+  @Get('/todo')
+  async mostrarTodas(@Res() response: Response) {
+    const data = await this.suspenService.mostrarTodas();
+
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Lista  del suspensiones',
+        data,
+      });
+    }
+  }
+
   @Get()
-  async mostrarTodo(
+  async activasPorFecha(
     @Query() params: FiltroSuspensionDto,
     @Res() response: Response,
   ) {
@@ -48,7 +60,7 @@ export class SuspensionController {
 
     if (data) {
       response.status(HttpStatus.OK).json({
-        msg: 'Lista  del roles',
+        msg: 'Lista  del suspensiones',
         data,
       });
     }

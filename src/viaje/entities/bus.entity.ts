@@ -8,6 +8,7 @@ export class Bus extends Document {
   @Prop({ required: true })
   numeroDisco: string;
 
+  @Prop({ required: true })
   estado: boolean;
 }
 

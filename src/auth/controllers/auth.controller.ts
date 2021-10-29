@@ -1,4 +1,11 @@
-import { Controller, UseGuards, Req, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  UseGuards,
+  Req,
+  Post,
+  Body,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '../services/auth.service';
@@ -13,9 +20,17 @@ export class AuthController {
   @Post('login')
   async login(@Body() login: LoginDto) {
     console.log(login, 'logins');
-    const { correo, clave } = login;
-    const usuario = await this.authService.validarUsuario(correo, clave);
+    const { cedula, clave } = login;
+    const usuario = await this.authService.validarUsuario(cedula, clave);
+    if (!usuario) {
+      return new UnauthorizedException('no señor');
+    }
 
     return this.authService.generarJWT(usuario);
   }
+  //  login(@Req() req: Request) {
+  //   const user = req.user as Usuario;
+  //   console.log(user);
+  //   return this.authService.generarJWT(user);
+  // }
 }

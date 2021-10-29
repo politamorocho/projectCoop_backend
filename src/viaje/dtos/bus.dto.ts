@@ -21,6 +21,9 @@ export class CrearBusDto {
 
   @IsNotEmpty()
   estado: boolean;
+
+  // @IsNotEmpty()
+  // asientos: number;
 }
 
 export class ActualizarBusDto extends PartialType(CrearBusDto) {}

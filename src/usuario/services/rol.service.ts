@@ -23,7 +23,7 @@ export class RolService {
   ) {}
 
   async crearRol(rol: CrearRolDto) {
-    //  console.log(rol, 'rol');
+    console.log(rol, 'rol');
     const rolExiste = await this.rolModel.findOne({ nombre: rol.nombre });
 
     //si existe no se crea
@@ -32,11 +32,11 @@ export class RolService {
     }
 
     //si no existe lo crea
-    const datos = {
-      nombre: rol.nombre,
-      descripcion: rol.descripcion,
-      estado: rol.estado,
-    };
+    // const datos = {
+    //   nombre: rol.nombre,
+    //   descripcion: rol.descripcion,
+    //   estado: rol.estado,
+    // };
     const data = await new this.rolModel(rol).save();
     console.log('data...', data);
     return data;
@@ -133,6 +133,6 @@ export class RolService {
       return false;
     }
 
-    return true || rolExiste;
+    return true; //|| rolExiste;
   }
 }

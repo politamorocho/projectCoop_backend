@@ -36,25 +36,6 @@ export class UsuarioController {
     }
   }
 
-  // @Get()
-  // async mostrarparte(
-  //   @Res() response: Response,
-  //   @Query() params?: FiltroUsuarioDto,
-  // ) {
-  //   const data = await this.usuarioService.mostrarTodo(params);
-
-  //   if (data) {
-  //     response.status(HttpStatus.OK).json({
-  //       msg: 'Lista  del usuarios',
-  //       data,
-  //     });
-  //   } else {
-  //     response.status(HttpStatus.BAD_REQUEST).json({
-  //       msg: 'no se pudo obtener usuario',
-  //     });
-  //   }
-  // }
-
   @Get('/p')
   async mostrarUno(@Query() id: IdUsuarioDto, @Res() response: Response) {
     const data = await this.usuarioService.mostrarUno(id);
@@ -66,9 +47,21 @@ export class UsuarioController {
     }
   }
 
-  @Get('/encontrar')
+  @Get('/buscar')
   async busqueda(@Query() params: FiltroUsuarioDto, @Res() response: Response) {
     const data = await this.usuarioService.busqueda(params);
+
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'lista de usuarios',
+        data,
+      });
+    }
+  }
+
+  @Get('/filtrar')
+  async filtrar(@Query() params: FiltroUsuarioDto, @Res() response: Response) {
+    const data = await this.usuarioService.filtroActivoInactivo(params);
 
     if (data) {
       response.status(HttpStatus.OK).json({
@@ -113,6 +106,35 @@ export class UsuarioController {
     if (data) {
       response.status(HttpStatus.OK).json({
         msg: 'Usuario eliminado con exito',
+      });
+    }
+  }
+
+  @Put('/actClave')
+  async actualizarClave(
+    @Body() clave: string,
+    @Query() id: string,
+    @Res() response: Response,
+  ) {
+    const data = await this.usuarioService.verificarClave(clave, id);
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'clave cambiada con exito',
+      });
+    } else {
+      response.status(HttpStatus.BAD_REQUEST).json({
+        msg: 'no se pudo actualizar',
+      });
+    }
+  }
+
+  @Get('/viaje')
+  async viajes(@Query() id: IdUsuarioDto, @Res() response: Response) {
+    const data = await this.usuarioService.busquedaUsuarioViaje(id);
+
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'lista de viajes del usuario',
         data,
       });
     }

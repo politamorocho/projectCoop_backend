@@ -11,16 +11,16 @@ import {
 } from 'class-validator';
 
 export class CrearRolDto {
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   nombre: string;
 
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   descripcion: string;
 
-  @IsNotEmpty()
   @IsBoolean()
+  @IsNotEmpty()
   estado: boolean;
 }
 

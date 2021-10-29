@@ -51,6 +51,18 @@ export class ViajeService {
     return this.viajeModel.find().exec();
   }
 
+  async eliminar(id: string) {
+    const existe = await this.viajeModel.findById({ _id: id });
+
+    const data = await this.viajeModel.findByIdAndUpdate(
+      id,
+      { estado: false },
+      { new: true },
+    );
+
+    return data;
+  }
+
   async viajePorUsuario(nombre: FiltroUsuarioDto) {
     const usExiste = await this.usuarioService.busquedaPorNombre(nombre);
 

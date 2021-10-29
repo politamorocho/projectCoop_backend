@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcryptjs from 'bcrypt';
 import { Usuario } from 'src/usuario/entities/usuario.entity';
@@ -12,9 +12,13 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validarUsuario(correo: string, clave: string) {
-    const usuario = await this.usuarioService.existeUsuarioPorCorreo(correo);
-    // console.log(usuario, 'es usuario');
+  async validarUsuario(cedula: string, clave: string) {
+    const usuario = await this.usuarioService.existeUsuarioPorCedula(cedula);
+    console.log(usuario, 'es usuario');
+
+    // if (!usuario) {
+    //   return new UnauthorizedException('no coinciden las credenciales');
+    // }
 
     if (usuario) {
       const siClave = await bcryptjs.compare(clave, usuario.claveUsuario);

@@ -30,7 +30,7 @@ export class UsuarioService {
   ) {}
 
   async mostrarTodo() {
-    let data = await this.usuarioModel.find().exec();
+    let data = await this.usuarioModel.find().populate('rol', '__v').exec();
 
     return data;
   }
@@ -50,6 +50,28 @@ export class UsuarioService {
     }
 
     return data;
+  }
+
+  //filtra activos e inactivos
+  async filtroActivoInactivo(query: FiltroUsuarioDto) {
+    let data;
+    const { estado } = query;
+    if (estado == 0) {
+      data = await this.usuarioModel
+        .find({ estado: false })
+        .populate('rol', '-__v')
+        .exec();
+      return data;
+    }
+    if (estado == 1) {
+      data = await this.usuarioModel
+        .find({ estado: true })
+        .populate('rol', '-__v')
+        .exec();
+      return data;
+    }
+
+    //  return data;
   }
 
   //busca usuarios por coincidencias de nombres o apellidos o cedula
@@ -117,30 +139,29 @@ export class UsuarioService {
       );
     }
 
-    // //si es un mongoid valido, verifica que exista
-    // const rolId = await this.rolService.verificaRolId(usuario.rol);
-    // if (!rolId) {
-    //   throw new BadRequestException(`El rol  ${usuario.rol} no existe`);
-    // }
+    //si es un mongoid valido, verifica que exista
+    const rolId = await this.rolService.verificaRolId(usuario.rol);
+    if (!rolId) {
+      throw new BadRequestException(`El rol  ${usuario.rol} no existe`);
+    }
 
-    // //pregunta si es un rol activo
-    // const rolActivo = await this.rolService.verificaRolActivo(usuario.rol);
-    // if (!rolActivo) {
-    //   throw new BadRequestException(`El rol asignado no es un rol activo`);
-    // }
+    //pregunta si es un rol activo
+    const rolActivo = await this.rolService.verificaRolActivo(usuario.rol);
+    if (!rolActivo) {
+      throw new BadRequestException(`El rol asignado no es un rol activo`);
+    }
 
     //si no existe el correo y existe el rol, entonces crea el usuario
-    if (!correoExiste) {
-      //encriptar la clave
-      const salt = bcryptjs.genSaltSync(10);
-      usuario.claveUsuario = bcryptjs.hashSync(usuario.claveUsuario, salt);
+    // if (!correoExiste) {
+    //encriptar la clave
+    const salt = bcryptjs.genSaltSync(10);
+    usuario.claveUsuario = bcryptjs.hashSync(usuario.claveUsuario, salt);
 
-      //guardar en bd
-      const data = await new this.usuarioModel(usuario).save();
+    //guardar en bd
+    const data = await new this.usuarioModel(usuario).save();
 
-      console.log(data, 'data');
-      return data;
-    }
+    console.log(data, 'data');
+    return data;
   }
 
   async actualizar(idUs: IdUsuarioDto, cambios: ActualizarUsuarioDto) {
@@ -186,25 +207,25 @@ export class UsuarioService {
     }
 
     //verifica el id de rol que sea valido
-    // if (cambios.rol) {
-    //   if (!isMongoId(cambios.rol)) {
-    //     throw new BadRequestException(`el rol no es un id de mongo valido`);
-    //   }
+    if (cambios.rol) {
+      if (!isMongoId(cambios.rol)) {
+        throw new BadRequestException(`el rol no es un id de mongo valido`);
+      }
 
-    //   //si es un mongoid valido, verifica que exista
-    //   const rolId = await this.rolService.verificaRolId(cambios.rol);
-    //   if (!rolId) {
-    //     throw new NotFoundException(`el rol no existe`);
-    //   }
+      //si es un mongoid valido, verifica que exista
+      const rolId = await this.rolService.verificaRolId(cambios.rol);
+      if (!rolId) {
+        throw new NotFoundException(`el rol no existe`);
+      }
 
-    //   //pregunta si es un rol activo
-    //   const rolActivo = await this.rolService.verificaRolActivo(cambios.rol);
-    //   if (!rolActivo) {
-    //     throw new BadRequestException(`el rol no es un rol activo`);
-    //   }
+      //pregunta si es un rol activo
+      const rolActivo = await this.rolService.verificaRolActivo(cambios.rol);
+      if (!rolActivo) {
+        throw new BadRequestException(`el rol no es un rol activo`);
+      }
 
-    //   data.rol = mongoose.Types.ObjectId(cambios.rol);
-    // }
+      data.rol = mongoose.Types.ObjectId(cambios.rol);
+    }
 
     console.log('data:', data);
 
@@ -282,18 +303,48 @@ export class UsuarioService {
     return data;
   }
 
-  async busquedaUsuarioViaje(id: string) {
+  async existeUsuarioPorCedula(cedulaUs: string) {
+    console.log(cedulaUs, 'cedla usservi');
+    const data = await this.usuarioModel.findOne({ cedula: cedulaUs }).exec();
+
+    if (!data) {
+      return false;
+    }
+
+    return data;
+  }
+
+  async busquedaUsuarioViaje(idUs: IdUsuarioDto) {
+    const { id } = idUs;
     const data = await this.usuarioModel.aggregate([
       { $match: { _id: mongoose.Types.ObjectId(id) } },
       {
+        $project: {
+          nombre: 1,
+          apellido: 1,
+          cedula: 1,
+          tipo: 1,
+          rol: '$rol.nombre',
+        },
+      },
+      {
         $lookup: {
-          from: 'viaje',
-          localeField: '_id',
-          foreignField: '_id',
+          from: 'viajes',
+          localField: '_id',
+          foreignField: 'usuario_chofer_id',
           as: 'viaje',
         },
       },
+
       { $unwind: '$viaje' },
     ]);
+
+    console.log(data, 'lo que sale del viaje');
+
+    const datos = data.forEach((x) => {
+      //x.viaje.bus.populate('bus');
+    });
+
+    return data;
   }
 }

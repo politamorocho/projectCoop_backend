@@ -43,71 +43,72 @@ export class SuspensionService {
     }
   }
 
+  //muestra todas las suspensiones
+  async mostrarTodas() {
+    console.log('entro por aqui mostrar suspensiones');
+    const data = await this.suspensionModel.find().populate('usuario', '-__v');
+
+    return data;
+  }
+
   //mostrar listado de suspensiones activos o inactivas por rango de fecha
-  async activasPorFecha(params?: FiltroSuspensionDto) {
-    //si no manda ningun parametro, muestra todas las suspensiones.
-    let existeId = await this.suspensionModel
-      .find()
-      .populate('usuario', '-__v')
-      .exec();
+  async activasPorFecha(params: FiltroSuspensionDto) {
+    const filters: FilterQuery<Suspension> = {};
+    const { estado, desde, hasta } = params;
 
-    //si hay parametros
-    if (params) {
-      const filters: FilterQuery<Suspension> = {};
-      const { estado, desde, hasta } = params;
-
-      if (estado) {
-        if (estado == 0) {
-          existeId = await this.suspensionModel
-            .find({ estado: false })
-            // .populate('usuario', '-__v')
-            .exec();
-        }
-
-        if (estado == 1) {
-          existeId = await this.suspensionModel
-            .find({ estado: true })
-            // .populate('usuario', '-__v')
-            .exec();
-        }
-        return existeId;
+    if (estado) {
+      if (estado == 0) {
+        const act = await this.suspensionModel
+          .find({ estado: false })
+          .populate('usuario', '-__v')
+          .exec();
+        return act;
       }
 
-      if (estado && desde) {
-        if (estado == 0) {
-          existeId = await this.suspensionModel
-            .find({ inicio: desde }, { estado: false })
-            .populate('usuario', '-__v')
-            .exec();
-        }
-        if (estado == 1) {
-          existeId = await this.suspensionModel
-            .find({ inicio: desde }, { estado: true })
-            .populate('usuario', '-__v')
-            .exec();
-        }
+      if (estado == 1) {
+        const inc = await this.suspensionModel
+          .find({ estado: true })
+          .populate('usuario', '-__v')
+          .exec();
 
-        return existeId;
-      }
-
-      if (estado && desde && hasta) {
-        if (estado == 0) {
-          existeId = await this.suspensionModel
-            .find({ inicio: desde, final: hasta, estado: false })
-            .populate('usuario', '-__v')
-            .exec();
-        }
-        if (estado == 1) {
-          existeId = await this.suspensionModel
-            .find({ estado: true, final: hasta, inicio: desde })
-            .populate('usuario', '-__v')
-            .exec();
-        }
-        return existeId;
+        return inc;
       }
     }
 
-    return existeId;
+    if (estado && desde) {
+      if (estado == 0) {
+        const bus1 = await this.suspensionModel
+          .find({ inicio: desde }, { estado: false })
+          .populate('usuario', '-__v')
+          .exec();
+        return bus1;
+      }
+      if (estado == 1) {
+        const bus2 = await this.suspensionModel
+          .find({ inicio: desde }, { estado: true })
+          .populate('usuario', '-__v')
+          .exec();
+
+        return bus2;
+      }
+    }
+
+    if (estado && desde && hasta) {
+      if (estado == 0) {
+        const bus3 = await this.suspensionModel
+          .find({ inicio: desde, final: hasta, estado: false })
+          .populate('usuario', '-__v')
+          .exec();
+        return bus3;
+      }
+      if (estado == 1) {
+        const bus4 = await this.suspensionModel
+          .find({ estado: true, final: hasta, inicio: desde })
+          .populate('usuario', '-__v')
+          .exec();
+        return bus4;
+      }
+    }
   }
 
   async listarPorUsuario(idUs: IdUsuarioDto, params?: FiltroSuspensionDto) {

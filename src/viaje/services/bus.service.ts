@@ -24,18 +24,32 @@ export class BusService {
 
   //crear un bus
   async crearBus(bus: CrearBusDto) {
+    console.log('esta llegando ', bus);
     const existePlaca = await this.busModel.findOne({ placa: bus.placa });
 
     if (existePlaca) {
       throw new BadRequestException(`El bus con placa: ${bus.placa} ya existe`);
     }
-    const datos = {
-      placa: bus.placa,
-      numeroDisco: bus.numeroDisco,
-      estado: bus.estado,
-    };
-    const data = await new this.busModel({ datos }).save();
-    console.log('data', datos);
+    //else {
+    //   const datos = await new this.busModel(bus).save();
+    //   console.log('data', datos);
+    //   return datos;
+    // }
+    // const datos = {
+    //   placa: bus.placa,
+    //   numeroDisco: bus.numeroDisco,
+    //   estado: bus.estado,
+    // };
+
+    const data = await new this.busModel(bus).save();
+
+    console.log('data', data);
+    return data;
+  }
+
+  async mostrarTodos() {
+    const data = await this.busModel.find().exec();
+
     return data;
   }
 
