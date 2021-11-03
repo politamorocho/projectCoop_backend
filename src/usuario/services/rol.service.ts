@@ -18,18 +18,23 @@ import {
 @Injectable()
 export class RolService {
   constructor(
-    @Inject('MONGO') private databaseMongo: Db,
+    
     @InjectModel(Rol.name) private rolModel: Model<Rol>,
   ) {}
 
-  async crearRol(rol: CrearRolDto) {
+  async crearRol(rol: any) {
     console.log(rol, 'rol');
-    const rolExiste = await this.rolModel.findOne({ nombre: rol.nombre });
+    console.log(rol.nombre);
+    let nb = rol.nombre;
+    const rolExiste = await this.rolModel.find({
+      nombre: 'superadministrador',
+    });
 
+    console.log(rolExiste);
     //si existe no se crea
-    if (rolExiste) {
-      throw new BadRequestException(`El rol ${rolExiste.nombre} ya existe`);
-    }
+    // if (rolExiste) {
+    //   throw new BadRequestException(`El rol ${rolExiste.nombre} ya existe`);
+    // }
 
     //si no existe lo crea
     // const datos = {
@@ -38,7 +43,7 @@ export class RolService {
     //   estado: rol.estado,
     // };
     const data = await new this.rolModel(rol).save();
-    console.log('data...', data);
+    console.log(data);
     return data;
   }
 

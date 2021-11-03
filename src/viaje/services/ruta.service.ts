@@ -18,7 +18,7 @@ import {
 @Injectable()
 export class RutaService {
   constructor(
-    @Inject('MONGO') private existeIdbaseMongo: Db,
+    
     @InjectModel(Ruta.name) private rutaModel: Model<Ruta>,
   ) {}
 

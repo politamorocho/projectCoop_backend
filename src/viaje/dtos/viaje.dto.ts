@@ -32,11 +32,11 @@ export class CrearViajeDto {
 
   @IsNotEmpty()
   @IsMongoId()
-  usuario_chofer_id: string;
+  usuChoferId: string;
 
   @IsNotEmpty()
   @IsMongoId()
-  usuario_ayudante_id: string;
+  usuAyudanteId: string;
 
   @IsNotEmpty()
   @IsMongoId()
@@ -50,10 +50,7 @@ export class CrearViajeDto {
 export class ActualizarViajeDto extends PartialType(CrearViajeDto) {}
 
 export class FiltroViajeDto {
-  @IsOptional()
-  @IsString()
-  rutaId: string;
-
-
-
+  @IsNotEmpty()
+  @IsMongoId()
+  id: string;
 }

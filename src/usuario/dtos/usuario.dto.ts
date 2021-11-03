@@ -65,3 +65,13 @@ export class IdUsuarioDto {
   @IsMongoId()
   id: string;
 }
+
+export class CambiarClaveDto {
+  @IsNotEmpty()
+  @IsString()
+  claveAnterior: string;
+
+  @IsNotEmpty()
+  @IsString()
+  claveNueva: string;
+}

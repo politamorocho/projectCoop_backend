@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
+@Schema()
 export class Bus extends Document {
   @Prop({ required: true, unique: true })
   placa: string;

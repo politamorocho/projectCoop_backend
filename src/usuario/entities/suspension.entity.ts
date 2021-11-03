@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Usuario } from './usuario.entity';
 
+@Schema()
 export class Suspension extends Document {
   @Prop({ required: true })
   inicio: Date;

@@ -17,20 +17,22 @@ import {
   CrearUsuarioDto,
   FiltroUsuarioDto,
   IdUsuarioDto,
+  CambiarClaveDto,
 } from '../dtos/usuario.dto';
 import { RolService } from './rol.service';
 
 @Injectable()
 export class UsuarioService {
   constructor(
-    @Inject('MONGO') private databaseMongo: Db,
     @InjectModel(Usuario.name) private usuarioModel: Model<Usuario>,
 
     private readonly rolService: RolService,
   ) {}
 
   async mostrarTodo() {
-    let data = await this.usuarioModel.find().populate('rol', '__v').exec();
+    console.log(this.usuarioModel.schema.paths);
+    let data = await this.usuarioModel.find();
+    //.populate('rol', '__v').exec();
 
     return data;
   }
@@ -40,7 +42,7 @@ export class UsuarioService {
     const { id } = idUs;
     const data = await this.usuarioModel
       .findOne({ _id: id })
-      .populate('rol', '__v')
+      //.populate('rol', '__v')
       .exec();
     if (!data) {
       return false;
@@ -59,14 +61,14 @@ export class UsuarioService {
     if (estado == 0) {
       data = await this.usuarioModel
         .find({ estado: false })
-        .populate('rol', '-__v')
+        // .populate('rol', '-__v')
         .exec();
       return data;
     }
     if (estado == 1) {
       data = await this.usuarioModel
         .find({ estado: true })
-        .populate('rol', '-__v')
+        // .populate('rol', '-__v')
         .exec();
       return data;
     }
@@ -78,21 +80,20 @@ export class UsuarioService {
   async busqueda(query: FiltroUsuarioDto) {
     const { busqueda, cedula } = query;
     if (busqueda) {
-      let data = await this.usuarioModel
-        .find({
-          $or: [
-            { nombre: { $regex: `^${busqueda}`, $options: '$i' } },
-            { apellido: { $regex: `^${busqueda}`, $options: '$i' } },
-          ],
-        })
-        .populate('rol');
+      let data = await this.usuarioModel.find({
+        $or: [
+          { nombre: { $regex: `^${busqueda}`, $options: '$i' } },
+          { apellido: { $regex: `^${busqueda}`, $options: '$i' } },
+        ],
+      });
+      //  .populate('rol', '-__v');
       return data;
     }
 
     if (cedula) {
       let dato = await this.usuarioModel
         .find({ cedula: cedula })
-        .populate('rol');
+        .populate('rol', '-__v');
       return dato;
     }
   }
@@ -100,14 +101,13 @@ export class UsuarioService {
   async busquedaPorNombre(query: FiltroUsuarioDto) {
     const { busqueda } = query;
 
-    let data = await this.usuarioModel
-      .find({
-        $or: [
-          { nombre: { $regex: `^${busqueda}`, $options: '$i' } },
-          { apellido: { $regex: `^${busqueda}`, $options: '$i' } },
-        ],
-      })
-      .populate('rol');
+    let data = await this.usuarioModel.find({
+      $or: [
+        { nombre: { $regex: `^${busqueda}`, $options: '$i' } },
+        { apellido: { $regex: `^${busqueda}`, $options: '$i' } },
+      ],
+    });
+    // .populate('rol', '-__v');
 
     if (!data) {
       throw new NotFoundException(`No existen coincidencias`);
@@ -237,19 +237,36 @@ export class UsuarioService {
     return actualizado;
   }
 
-  async verificarClave(clave: string, idUs: string) {
-    const usuario = await this.usuarioModel.findById({ _id: idUs });
+  async verificarClave(idUs: IdUsuarioDto, cambios: CambiarClaveDto) {
+    const { id } = idUs;
+    const { claveAnterior, claveNueva } = cambios;
 
-    const siExiste = await bcryptjs.compare(clave, usuario.claveUsuario);
-
-    if (!siExiste) {
+    const usuario1 = await this.usuarioModel.findById({ _id: id });
+    if (!usuario1) {
       return false;
     }
 
-    const salt = bcryptjs.genSaltSync(10);
-    usuario.claveUsuario = bcryptjs.hashSync(clave, salt);
+    //const anterior = cambios.claveAnterior;
+    console.log(claveAnterior, 'es la clave anterior');
+    const siCoincide = await bcryptjs.compare(
+      claveAnterior,
+      usuario1.claveUsuario,
+    );
 
-    return usuario;
+    console.log(siCoincide, 'resultado comparacion');
+    if (!siCoincide) {
+      return false;
+    }
+
+    const salt = await bcryptjs.genSaltSync(10);
+    const nueva = await bcryptjs.hashSync(claveNueva, salt);
+
+    const actualizado = await this.usuarioModel.findByIdAndUpdate(
+      id,
+      { $set: { claveUsuario: nueva } },
+      { new: true },
+    );
+    return true;
   }
 
   async eliminar(idUs: IdUsuarioDto) {
@@ -268,6 +285,17 @@ export class UsuarioService {
       { estado: false },
       { new: true },
     );
+
+    return data;
+  }
+
+  async existeUsuarioIdRetUs(id: string) {
+    const data = await this.usuarioModel.findById({ _id: id });
+    //.populate('rol', '-__v');
+
+    // if (!data) {
+    //   return false;
+    // }
 
     return data;
   }

@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Model, FilterQuery } from 'mongoose';
+const mongoose = require('mongoose');
 import { InjectModel } from '@nestjs/mongoose';
 import { Db } from 'mongodb';
 import { Viaje } from '../entities/viaje.entity';
@@ -13,11 +14,11 @@ import { UsuarioService } from '../../usuario/services/usuario.service';
 import { BusService } from './bus.service';
 import { RutaService } from './ruta.service';
 import { FiltroUsuarioDto } from 'src/usuario/dtos/usuario.dto';
+import { Bus } from '../entities/bus.entity';
 
 @Injectable()
 export class ViajeService {
   constructor(
-    @Inject('MONGO') private existeIdbaseMongo: Db,
     @InjectModel(Viaje.name) private viajeModel: Model<Viaje>,
     private usuarioService: UsuarioService,
     private busService: BusService,
@@ -26,11 +27,11 @@ export class ViajeService {
 
   //crear un viaje
   async crearViaje(viaje: CrearViajeDto) {
-    if (!this.usuarioService.existeUsuarioId(viaje.usuario_chofer_id)) {
+    if (!this.usuarioService.existeUsuarioId(viaje.usuChoferId)) {
       throw new BadRequestException('no existe usuario con ese id');
     }
 
-    if (!this.usuarioService.existeUsuarioId(viaje.usuario_ayudante_id)) {
+    if (!this.usuarioService.existeUsuarioId(viaje.usuAyudanteId)) {
       throw new BadRequestException('no existe usuario con ese id');
     }
 
@@ -48,6 +49,8 @@ export class ViajeService {
   }
 
   async listarTodo() {
+    //  console.log(this.viajeModel.schema.paths);
+
     return this.viajeModel.find().exec();
   }
 
@@ -63,24 +66,115 @@ export class ViajeService {
     return data;
   }
 
-  async viajePorUsuario(nombre: FiltroUsuarioDto) {
-    const usExiste = await this.usuarioService.busquedaPorNombre(nombre);
+  async viajePorUsuario(idUs: FiltroViajeDto) {
+    const { id } = idUs;
+    const usExiste = await this.usuarioService.existeUsuarioIdRetUs(id);
+    if (!usExiste) {
+      throw new BadRequestException('No existe el usuario');
+    }
 
-    // const viajeExiste = await this.viajeModel
-    //   .find({
-    //     $or: [
-    //       { usuario_chofer_id: usExiste._id },
-    //       { usuario_ayudante_id: usExiste._id },
-    //     ],
-    //   })
-    //   .populate('usuario')
-    //   .populate('bus')
-    //   .populate('ruta');
+    const data = await this.viajeModel.aggregate([
+      {
+        $match: {
+          $or: [{ usuChoferId: usExiste._id }, { usuAyudanteId: usExiste._id }],
+        },
+      },
+      {
+        $lookup: {
+          from: 'buses',
+          localField: 'bus',
+          foreignField: '_id',
+          as: 'bus',
+        },
+      },
+      {
+        $lookup: {
+          from: 'rutas',
+          localField: 'ruta',
+          foreignField: '_id',
+          as: 'ruta',
+        },
+      },
+      {
+        $lookup: {
+          from: 'usuarios',
+          localField: 'usuChoferId',
+          foreignField: '_id',
+          as: 'usuChoferId',
+        },
+      },
+      {
+        $lookup: {
+          from: 'usuarios',
+          localField: 'usuAyudanteId',
+          foreignField: '_id',
+          as: 'usuAyudanteId',
+        },
+      },
+      {
+        $lookup: {
+          from: 'rols',
+          localField: 'usuAyudanteId._id',
+          foreignField: 'nombre',
+          as: 'usuAyudanteId._id',
+        },
+      },
+      { $unwind: '$bus' },
+      { $unwind: '$ruta' },
+      { $unwind: '$usuAyudanteId' },
+      { $unwind: '$usuAyudanteId' },
+    ]);
 
     // if (!usExiste) {
     //   throw new NotFoundException('no existe el usuario');
     // }
 
-    // return viajeExiste;
+    console.log(data, 'viajessss');
+    return data;
   }
+
+  // async infoViajes() {
+  //   const data = await this.viajeModel.aggregate([
+  //     {
+  //       $lookup: {
+  //         from: 'buses',
+  //         localField: 'bus',
+  //         foreignField: '_id',
+  //         as: 'bus',
+  //       },
+  //     },
+  //     {
+  //       $lookup: {
+  //         from: 'rutas',
+  //         localField: 'ruta',
+  //         foreignField: '_id',
+  //         as: 'ruta',
+  //       },
+  //     },
+  //     {
+  //       $lookup: {
+  //         from: 'usuarios',
+  //         localField: 'usuChoferId',
+  //         foreignField: '_id',
+  //         as: 'usuChoferId',
+  //       },
+  //     },
+  //     {
+  //       $lookup: {
+  //         from: 'usuarios',
+  //         localField: 'usuAyudanteId',
+  //         foreignField: '_id',
+  //         as: 'usuAyudanteId',
+  //       },
+  //     },
+  //     { $unwind: '$bus' },
+  //     { $unwind: '$ruta' },
+  //     { $unwind: '$usuAyudanteId' },
+  //     { $unwind: '$usuAyudanteId' },
+  //   ]);
+
+  //   console.log(data, 'populrar');
+
+  //   return data;
+  // }
 }

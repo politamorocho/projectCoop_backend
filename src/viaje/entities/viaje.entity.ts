@@ -1,37 +1,56 @@
+import * as mongoose from 'mongoose';
 import { Document, Types } from 'mongoose';
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Ruta } from './ruta.entity';
-import { Usuario } from '../../usuario/entities/usuario.entity';
+import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
+import { Usuario } from 'src/usuario/entities/usuario.entity';
 import { Bus } from './bus.entity';
+import { Ruta } from './ruta.entity';
 
+@Schema()
 export class Viaje extends Document {
-  @Prop({ required: true })
+  @Prop({ type: Date, require: true })
   horaSalida: Date;
 
-  @Prop({ required: true })
+  @Prop({ type: Date, require: true })
   fechaSalida: Date;
 
-  @Prop({ required: true })
+  @Prop({ type: Date, require: true })
   horaLlegada: Date;
 
-  @Prop({ required: true })
+  @Prop({ type: Date, require: true })
   fechaLlegada: Date;
 
-  @Prop({ required: true })
+  @Prop({ type: Boolean, require: true })
   estado: boolean;
 
-  @Prop({ type: Types.ObjectId, ref: Usuario.name })
-  usuario_chofer_id: Usuario | Types.ObjectId;
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Usuario.name,
+    autopopulate: true,
+  })
+  usuChoferId: Usuario;
 
-  @Prop({ type: Types.ObjectId, ref: Usuario.name })
-  usuario_ayudante_id: Usuario | Types.ObjectId;
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Usuario.name,
+    autopopulate: true,
+  })
+  usuAyudanteId: Usuario;
 
-  @Prop({ type: Types.ObjectId, ref: Bus.name })
-  bus: Bus | Types.ObjectId;
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Bus.name,
+    autopopulate: true,
+  })
+  bus: Bus;
 
-  @Prop({ type: Types.ObjectId, ref: Ruta.name })
-  ruta: Ruta | Types.ObjectId;
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Ruta.name,
+    autopopulate: true,
+  })
+  ruta: Ruta;
 }
 
 export const ViajeSchema = SchemaFactory.createForClass(Viaje);
 ViajeSchema.set('timestamps', true);
+ViajeSchema.plugin(require('mongoose-autopopulate'));

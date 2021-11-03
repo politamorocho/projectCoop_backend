@@ -18,7 +18,7 @@ import {
 @Injectable()
 export class BusService {
   constructor(
-    @Inject('MONGO') private existeIdbaseMongo: Db,
+    
     @InjectModel(Bus.name) private busModel: Model<Bus>,
   ) {}
 

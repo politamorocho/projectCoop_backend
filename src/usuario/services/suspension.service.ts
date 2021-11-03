@@ -21,7 +21,7 @@ import {
 @Injectable()
 export class SuspensionService {
   constructor(
-    @Inject('MONGO') private existeIdbaseMongo: Db,
+  
     @InjectModel(Suspension.name) private suspensionModel: Model<Suspension>,
     private usuarioService: UsuarioService,
   ) {}

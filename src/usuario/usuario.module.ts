@@ -22,6 +22,6 @@ import { SuspensionService } from './services/suspension.service';
   controllers: [UsuarioController, RolController, SuspensionController],
 
   providers: [UsuarioService, RolService, SuspensionService],
-  exports: [UsuarioService, RolService, SuspensionService],
+  exports: [UsuarioService, RolService, SuspensionService, MongooseModule],
 })
 export class UsuarioModule {}

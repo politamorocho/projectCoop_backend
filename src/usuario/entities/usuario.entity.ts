@@ -19,8 +19,8 @@ export class Usuario extends Document {
   @Prop({})
   claveUsuario: string;
 
-  @Prop({ type: Types.ObjectId, ref: Rol.name })
-  rol: Rol | Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: Rol.name, autopopulate: true })
+  rol: Rol;
 
   @Prop({})
   estado: boolean;
@@ -32,3 +32,4 @@ UsuarioSchema.methods.toJSON = function () {
   const { __v, claveUsuario, ...data } = this.toObject();
   return data;
 };
+UsuarioSchema.plugin(require('mongoose-autopopulate'));

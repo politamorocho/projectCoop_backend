@@ -17,6 +17,7 @@ import {
   ActualizarUsuarioDto,
   FiltroUsuarioDto,
   IdUsuarioDto,
+  CambiarClaveDto,
 } from '../dtos/usuario.dto';
 import { UsuarioService } from '../services/usuario.service';
 
@@ -112,11 +113,11 @@ export class UsuarioController {
 
   @Put('/actClave')
   async actualizarClave(
-    @Body() clave: string,
-    @Query() id: string,
+    @Query() idUs: IdUsuarioDto,
+    @Body() cambios: CambiarClaveDto,
     @Res() response: Response,
   ) {
-    const data = await this.usuarioService.verificarClave(clave, id);
+    const data = await this.usuarioService.verificarClave(idUs, cambios);
     if (data) {
       response.status(HttpStatus.OK).json({
         msg: 'clave cambiada con exito',
