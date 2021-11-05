@@ -19,28 +19,28 @@ export class CrearUsuarioDto {
   @IsString()
   apellido: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsEmail()
   correo: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   //@Max(10)
   cedula: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   //@Min(8)
   claveUsuario: string;
 
-  // @IsMongoId()
+  @IsMongoId()
   @IsNotEmpty()
   rol: string;
 
   @IsOptional()
   tipo: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsBoolean()
   estado: boolean;
 }

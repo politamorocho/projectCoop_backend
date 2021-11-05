@@ -3,13 +3,13 @@ import { Document } from 'mongoose';
 
 @Schema()
 export class Rol extends Document {
-  @Prop({ unique: true })
+  @Prop({ unique: true, require: true })
   nombre: string;
 
-  @Prop({})
+  @Prop({ require: true })
   descripcion: string;
 
-  @Prop({})
+  @Prop({ default: true, require: true })
   estado: boolean;
 }
 

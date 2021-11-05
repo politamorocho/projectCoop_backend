@@ -17,53 +17,49 @@ import {
 
 @Injectable()
 export class RolService {
-  constructor(
-    
-    @InjectModel(Rol.name) private rolModel: Model<Rol>,
-  ) {}
+  constructor(@InjectModel(Rol.name) private rolModel: Model<Rol>) {}
 
-  async crearRol(rol: any) {
-    console.log(rol, 'rol');
-    console.log(rol.nombre);
-    let nb = rol.nombre;
+  //crea un rol nuevo
+  async crearRol(rol: CrearRolDto) {
     const rolExiste = await this.rolModel.find({
-      nombre: 'superadministrador',
+      nombre: rol.nombre,
     });
+    console.log(rolExiste, 'rol que existe');
 
-    console.log(rolExiste);
+    ////falta revisar el control de nombres repetidos///
     //si existe no se crea
     // if (rolExiste) {
-    //   throw new BadRequestException(`El rol ${rolExiste.nombre} ya existe`);
+    //   throw new BadRequestException(`El rol ${rol.nombre} ya existe`);
     // }
 
     //si no existe lo crea
-    // const datos = {
-    //   nombre: rol.nombre,
-    //   descripcion: rol.descripcion,
-    //   estado: rol.estado,
-    // };
     const data = await new this.rolModel(rol).save();
-    console.log(data);
+
     return data;
   }
 
-  //obtener roles activos, inactivos y todos.
-  async mostrarTodo(query?: FiltroRolDto) {
-    let data = await this.rolModel.find().exec();
-    if (query) {
-      const { estado } = query;
+  //mostrar todos los roles
+  async todos() {
+    return await this.rolModel.find().exec();
+  }
 
-      if (estado === 0) {
-        data = await this.rolModel.find({ estado: false }).exec();
-      }
-      if (estado === 1) {
-        data = await this.rolModel.find({ estado: true }).exec();
-      }
+  //filtra roles por activos=1 o inactivos=0 enviado por query
+  async filtroActivoInactivo(query: FiltroRolDto) {
+    let data;
+
+    const { estado } = query;
+
+    if (estado == 0) {
+      data = await this.rolModel.find({ estado: false }).exec();
       return data;
     }
-    return data;
+    if (estado == 1) {
+      data = await this.rolModel.find({ estado: true }).exec();
+      return data;
+    }
   }
 
+  //info de un rol buscado por id enviado por query
   async mostrarUno(query: IdRolDto) {
     const { id } = query;
     const data = await this.rolModel.findOne({ _id: id }).exec();
@@ -73,6 +69,20 @@ export class RolService {
     return data;
   }
 
+  //buscar roles por nombre
+  async buscar(query: FiltroRolDto) {
+    const { busqueda } = query;
+    const data = await this.rolModel.find({
+      nombre: { $regex: `${busqueda}`, $options: '$i' },
+    });
+
+    if (!data) {
+      throw new NotFoundException('No existen roles que coincidan');
+    }
+    return data;
+  }
+
+  //actualiza un rol seleccinado por id, enviado por query
   async actualizar(query: IdRolDto, rol: ActualizarRolDto) {
     const { id } = query;
     const existeId = await this.rolModel.findOne({ _id: id });
@@ -85,7 +95,7 @@ export class RolService {
 
     if (!existeId.estado) {
       throw new BadRequestException(
-        `no se puede actualizar el rol  ${existeId.nombre} porque es inactivo`,
+        `no se puede actualizar el rol porque es inactivo`,
       );
     }
 
@@ -109,7 +119,7 @@ export class RolService {
 
     if (!existeId.estado) {
       throw new BadRequestException(
-        `no se puede actualizar el rol  ${existeId.nombre} porque es inactivo`,
+        `no se puede eliminar el rol  porque es inactivo`,
       );
     }
     const data = await this.rolModel.findByIdAndUpdate(
@@ -139,5 +149,16 @@ export class RolService {
     }
 
     return true; //|| rolExiste;
+  }
+
+  async esRolEmpleado(idRol: string) {
+    const data = await this.rolModel.findById({ _id: idRol });
+    const nombre = data.nombre;
+    const emp: string = 'empleado';
+    if (nombre.toLowerCase() !== emp.toLowerCase()) {
+      throw new BadRequestException('el usuario no tiene el rol de empleado');
+    }
+
+    return true;
   }
 }

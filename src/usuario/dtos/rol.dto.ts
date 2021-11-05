@@ -11,16 +11,16 @@ import {
 } from 'class-validator';
 
 export class CrearRolDto {
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   nombre: string;
 
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   descripcion: string;
 
-  @IsBoolean()
   @IsNotEmpty()
+  @IsBoolean()
   estado: boolean;
 }
 
@@ -32,6 +32,10 @@ export class FiltroRolDto {
   @Min(0)
   @Max(1)
   estado: number;
+
+  @IsOptional()
+  @IsString()
+  busqueda: string;
 }
 
 export class IdRolDto {

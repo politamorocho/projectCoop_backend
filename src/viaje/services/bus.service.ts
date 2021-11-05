@@ -17,29 +17,25 @@ import {
 
 @Injectable()
 export class BusService {
-  constructor(
-    
-    @InjectModel(Bus.name) private busModel: Model<Bus>,
-  ) {}
+  constructor(@InjectModel(Bus.name) private busModel: Model<Bus>) {}
 
   //crear un bus
   async crearBus(bus: CrearBusDto) {
-    console.log('esta llegando ', bus);
+    //  console.log('esta llegando ', bus);
     const existePlaca = await this.busModel.findOne({ placa: bus.placa });
 
     if (existePlaca) {
       throw new BadRequestException(`El bus con placa: ${bus.placa} ya existe`);
     }
-    //else {
-    //   const datos = await new this.busModel(bus).save();
-    //   console.log('data', datos);
-    //   return datos;
-    // }
-    // const datos = {
-    //   placa: bus.placa,
-    //   numeroDisco: bus.numeroDisco,
-    //   estado: bus.estado,
-    // };
+
+    const numDisco = await this.busModel.findOne({
+      numeroDisco: bus.numeroDisco,
+    });
+    if (numDisco) {
+      throw new BadRequestException(
+        `El bus con numero de Disco: ${bus.numeroDisco} ya existe`,
+      );
+    }
 
     const data = await new this.busModel(bus).save();
 
@@ -47,31 +43,37 @@ export class BusService {
     return data;
   }
 
-  async mostrarTodos() {
+  async mostrarTodo() {
     const data = await this.busModel.find().exec();
 
     return data;
   }
 
-  //listar todos los buses y separados por activos o inactivos
-  async listar(params?: FiltroBusDto) {
-    //si no hay parametros, lista todos los buses
-    let busqueda = await this.busModel.find().exec();
-
-    if (params) {
-      const { estado } = params;
-
-      if (estado === 1) {
-        busqueda = await this.busModel.find({ estado: true });
-      }
-
-      if (estado === 0) {
-        busqueda = await this.busModel.find({ estado: false });
-      }
+  //mostrar la info de un bus enviado el id por query
+  async mostrarUno(idBus: IdBusDto) {
+    const { id } = idBus;
+    if (!(await this.busModel.findById(id))) {
+      throw new NotFoundException('no existe ese id');
     }
 
-    if (!busqueda) {
-      throw new BadRequestException(`No existen buses`);
+    const data = await this.busModel.findOne({ _id: id });
+    return data;
+  }
+
+  //listar todos los buses y separados por activos o inactivos
+  async listar(params: FiltroBusDto) {
+    let busqueda;
+
+    const { estado } = params;
+
+    if (estado == 1) {
+      busqueda = await this.busModel.find({ estado: true });
+      return busqueda;
+    }
+
+    if (estado == 0) {
+      busqueda = await this.busModel.find({ estado: false });
+      return busqueda;
     }
 
     return busqueda;
@@ -81,18 +83,21 @@ export class BusService {
   async buscarPorPlacaONumero(params: FiltroBusDto) {
     const { placa, numeroDisco } = params;
 
-    let data = await this.busModel.find({
-      $or: [
-        { placa: { $regex: `^${placa}`, $options: '$i' } },
-        { numeroDisco: { $regex: `^${numeroDisco}`, $options: '$i' } },
-      ],
-    });
-
-    if (!data) {
-      throw new NotFoundException(`No existen coincidencias`);
+    let data;
+    if (placa) {
+      data = await this.busModel.find({
+        placa: { $regex: `^${placa}`, $options: '$i' },
+      });
+      return data;
     }
 
-    // return data2;
+    if (numeroDisco) {
+      data = await this.busModel.find({
+        numeroDisco: { $regex: `^${numeroDisco}`, $options: '$i' },
+      });
+      return data;
+    }
+
     return data;
   }
 
@@ -140,13 +145,19 @@ export class BusService {
     return data;
   }
 
-  async existeBusId(id: string) {
+  async existeBusActivoId(id: string) {
     const siExiste = await this.busModel.findById({ _id: id });
 
     if (!siExiste) {
       return false;
     }
 
+    if (!siExiste.estado) {
+      return false;
+    }
+
     return true;
   }
+
+  async;
 }

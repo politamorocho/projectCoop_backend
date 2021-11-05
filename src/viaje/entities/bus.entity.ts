@@ -9,7 +9,7 @@ export class Bus extends Document {
   @Prop({ required: true })
   numeroDisco: string;
 
-  @Prop({ required: true })
+  @Prop({ default: true, required: true })
   estado: boolean;
 }
 

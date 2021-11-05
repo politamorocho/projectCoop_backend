@@ -25,6 +25,7 @@ import { UsuarioService } from '../services/usuario.service';
 export class UsuarioController {
   constructor(private usuarioService: UsuarioService) {}
 
+  //info de todos los usuarios activos e inactivos
   @Get()
   async mostrarTodo(@Res() response: Response) {
     const data = await this.usuarioService.mostrarTodo();
@@ -37,6 +38,7 @@ export class UsuarioController {
     }
   }
 
+  //info de un usuario activo buscado por id enviado por query
   @Get('/p')
   async mostrarUno(@Query() id: IdUsuarioDto, @Res() response: Response) {
     const data = await this.usuarioService.mostrarUno(id);
@@ -45,9 +47,15 @@ export class UsuarioController {
         msg: 'Perfil  del usuario',
         data,
       });
+    } else {
+      response.status(HttpStatus.OK).json({
+        msg: 'No se puede acceder al perfil del usuario',
+      });
     }
   }
 
+  //busca usuarios por coincidencias de nombres o apellidos o cedula
+  //enviados por query
   @Get('/buscar')
   async busqueda(@Query() params: FiltroUsuarioDto, @Res() response: Response) {
     const data = await this.usuarioService.busqueda(params);
@@ -60,7 +68,8 @@ export class UsuarioController {
     }
   }
 
-  @Get('/filtrar')
+  //filtra usuarios por activos=1 o inactivos=0 enviado por query
+  @Get('/filtro')
   async filtrar(@Query() params: FiltroUsuarioDto, @Res() response: Response) {
     const data = await this.usuarioService.filtroActivoInactivo(params);
 
@@ -80,7 +89,7 @@ export class UsuarioController {
     const data = await this.usuarioService.crearUsuario(usuario);
     if (data) {
       response.status(HttpStatus.OK).json({
-        //msg: 'usuario creado',
+        msg: 'usuario creado',
         data: data,
       });
     }
@@ -121,22 +130,6 @@ export class UsuarioController {
     if (data) {
       response.status(HttpStatus.OK).json({
         msg: 'clave cambiada con exito',
-      });
-    } else {
-      response.status(HttpStatus.BAD_REQUEST).json({
-        msg: 'no se pudo actualizar',
-      });
-    }
-  }
-
-  @Get('/viaje')
-  async viajes(@Query() id: IdUsuarioDto, @Res() response: Response) {
-    const data = await this.usuarioService.busquedaUsuarioViaje(id);
-
-    if (data) {
-      response.status(HttpStatus.OK).json({
-        msg: 'lista de viajes del usuario',
-        data,
       });
     }
   }

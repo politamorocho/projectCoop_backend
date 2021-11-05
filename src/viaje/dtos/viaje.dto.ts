@@ -11,22 +11,23 @@ import {
 } from 'class-validator';
 
 export class CrearViajeDto {
-  @IsNotEmpty()
-  @IsDate()
-  horaSalida: Date;
-  @IsNotEmpty()
-  @IsDate()
-  fechaSalida: Date;
+  // @IsOptional()
+  // @IsDate()
+  // horaSalida:  Date = new Date().toUTCString();
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsDate()
-  horaLlegada: Date;
+  fechaHoraSalida: Date = new Date();
 
-  @IsNotEmpty()
+  // @IsNotEmpty()
+  // @IsDate()
+  // horaLlegada: Date;
+
+  @IsOptional()
   @IsDate()
-  fechaLlegada: Date;
+  fechaHoraLlegada: Date;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsBoolean()
   estado: boolean;
 
@@ -34,7 +35,7 @@ export class CrearViajeDto {
   @IsMongoId()
   usuChoferId: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsMongoId()
   usuAyudanteId: string;
 
@@ -53,4 +54,10 @@ export class FiltroViajeDto {
   @IsNotEmpty()
   @IsMongoId()
   id: string;
+}
+
+export class AgregarAyudanteViajeDto {
+  @IsNotEmpty()
+  @IsMongoId()
+  usuAyudanteId: string;
 }

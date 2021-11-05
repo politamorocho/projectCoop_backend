@@ -36,7 +36,31 @@ export class BusController {
   }
 
   @Get()
-  async listar(@Res() response: Response, @Query() params?: FiltroBusDto) {
+  async mostrarTodo(@Res() response: Response) {
+    const data = await this.busService.mostrarTodo();
+
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Lista  del buses',
+        data,
+      });
+    }
+  }
+
+  @Get('/p')
+  async mostrarUno(@Query() id: IdBusDto, @Res() response: Response) {
+    const data = await this.busService.mostrarUno(id);
+
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Informacion del bus',
+        data,
+      });
+    }
+  }
+
+  @Get('/filtro')
+  async listar(@Res() response: Response, @Query() params: FiltroBusDto) {
     const data = await this.busService.listar(params);
 
     if (data) {
@@ -44,9 +68,17 @@ export class BusController {
         msg: 'Lista  del buses',
         data,
       });
-    } else {
-      response.status(HttpStatus.BAD_REQUEST).json({
-        msg: 'no existen buses',
+    }
+  }
+
+  @Get('/buscar')
+  async buscar(@Res() response: Response, @Query() params: FiltroBusDto) {
+    const data = await this.busService.buscarPorPlacaONumero(params);
+
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Lista  del buses',
+        data,
       });
     }
   }
@@ -71,8 +103,7 @@ export class BusController {
     const data = await this.busService.eliminar(id);
     if (data) {
       response.status(HttpStatus.OK).json({
-        msg: 'bus eliminado con exito',
-        data,
+        msg: 'Bus eliminado con exito',
       });
     }
   }

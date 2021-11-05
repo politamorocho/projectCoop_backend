@@ -17,10 +17,7 @@ import {
 
 @Injectable()
 export class RutaService {
-  constructor(
-    
-    @InjectModel(Ruta.name) private rutaModel: Model<Ruta>,
-  ) {}
+  constructor(@InjectModel(Ruta.name) private rutaModel: Model<Ruta>) {}
 
   //crear un bus
   async crearRuta(ruta: CrearRutaDto) {
@@ -34,33 +31,43 @@ export class RutaService {
         `La ruta con origen ${existeRuta.origen} y destino ${existeRuta.destino} ya existe`,
       );
     }
-    const datos = {
-      origen: ruta.origen,
-      destino: ruta.destino,
-      estado: ruta.estado,
-    };
-    const data = await new this.rutaModel({ datos }).save();
-    console.log('data', datos);
+
+    const data = await new this.rutaModel(ruta).save();
+
     return data;
   }
 
   //lista todas las rutas y activas o inactivas
-  async listar(params?: FiltroRutaDto) {
-    //si no viene ningun filtro,muestra todas las rutas
-    let lista = await this.rutaModel.find().exec();
+  async mostrarTodo() {
+    const data = await this.rutaModel.find().exec();
+    return data;
+  }
 
-    if (params) {
-      const { estado } = params;
+  async mostrarUno(idRuta: IdRutaDto) {
+    const { id } = idRuta;
+    const data = await this.rutaModel.findOne({ _id: id }).exec();
 
-      if (estado === 0) {
-        lista = await this.rutaModel.find({ estado: false });
-      }
-      if (estado === 1) {
-        lista = await this.rutaModel.find({ estado: true });
-      }
+    if (!data) {
+      throw new BadRequestException('No existe ruta con ese id');
+    }
+    return data;
+  }
+
+  async filtrarActivaInactiva(params: FiltroRutaDto) {
+    let lista;
+
+    const { estado } = params;
+
+    if (estado == 0) {
+      lista = await this.rutaModel.find({ estado: false });
+      return lista;
+    }
+    if (estado == 1) {
+      lista = await this.rutaModel.find({ estado: true });
+      return lista;
     }
 
-    return lista;
+    // return lista;
   }
 
   async buscarPorOrigenODestino(params: FiltroRutaDto) {
@@ -123,10 +130,14 @@ export class RutaService {
     return data;
   }
 
-  async existeRutaId(id: string) {
+  async existeRutaActivaId(id: string) {
     const siExiste = await this.rutaModel.findById({ _id: id });
 
     if (!siExiste) {
+      return false;
+    }
+
+    if (!siExiste.estado) {
       return false;
     }
 

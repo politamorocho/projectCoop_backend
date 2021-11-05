@@ -14,7 +14,7 @@ export class AuthService {
 
   async validarUsuario(cedula: string, clave: string) {
     const usuario = await this.usuarioService.existeUsuarioPorCedula(cedula);
-    console.log(usuario, 'es usuario');
+    // console.log(usuario, 'es usuario');
 
     // if (!usuario) {
     //   return new UnauthorizedException('no coinciden las credenciales');

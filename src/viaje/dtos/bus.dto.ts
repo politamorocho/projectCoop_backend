@@ -19,7 +19,7 @@ export class CrearBusDto {
   @IsNotEmpty()
   numeroDisco: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   estado: boolean;
 
   // @IsNotEmpty()

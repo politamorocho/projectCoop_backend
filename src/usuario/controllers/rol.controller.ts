@@ -24,9 +24,25 @@ import { RolService } from '../services/rol.service';
 export class RolController {
   constructor(private rolService: RolService) {}
 
+  //muestra todos los roles en db
   @Get()
-  async mostrarTodo(@Query() params: FiltroRolDto, @Res() response: Response) {
-    const data = await this.rolService.mostrarTodo(params);
+  async todo(@Res() response: Response) {
+    const data = await this.rolService.todos();
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Lista  del roles',
+        data,
+      });
+    }
+  }
+
+  //filtra roles por activos=1 o inactivos=0 enviado por query
+  @Get('/filtro')
+  async filtroActivoInactivo(
+    @Query() query: FiltroRolDto,
+    @Res() response: Response,
+  ) {
+    const data = await this.rolService.filtroActivoInactivo(query);
 
     if (data) {
       response.status(HttpStatus.OK).json({
@@ -36,6 +52,7 @@ export class RolController {
     }
   }
 
+  //info de un rol buscado por id enviado por query
   @Get('/p')
   async mostrarUno(@Query() id: IdRolDto, @Res() response: Response) {
     const data = await this.rolService.mostrarUno(id);
@@ -47,6 +64,19 @@ export class RolController {
     }
   }
 
+  //buscar roles por nombre
+  @Get('/buscar')
+  async buscar(@Query() buscar: FiltroRolDto, @Res() response: Response) {
+    const data = await this.rolService.buscar(buscar);
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Roles que coinciden',
+        data,
+      });
+    }
+  }
+
+  //crea un rol nuevo
   @Post()
   async crearRol(@Body() rol: CrearRolDto, @Res() response: Response) {
     const data = await this.rolService.crearRol(rol);
@@ -58,6 +88,7 @@ export class RolController {
     }
   }
 
+  //actualiza un rol seleccinado por id, enviado por query
   @Put()
   async actualizar(
     @Query() id: IdRolDto,
@@ -79,7 +110,6 @@ export class RolController {
     if (data) {
       response.status(HttpStatus.OK).json({
         msg: 'Rol eliminado con exito',
-        data,
       });
     }
   }

@@ -23,8 +23,8 @@ export class RutaController {
   constructor(private rutaService: RutaService) {}
 
   @Post()
-  async crearRuta(@Body() bus: CrearRutaDto, @Res() response: Response) {
-    const data = await this.rutaService.crearRuta(bus);
+  async crearRuta(@Body() ruta: CrearRutaDto, @Res() response: Response) {
+    const data = await this.rutaService.crearRuta(ruta);
     if (data) {
       response.status(HttpStatus.OK).json({
         msg: 'bus creado',
@@ -34,17 +34,40 @@ export class RutaController {
   }
 
   @Get()
-  async listar(@Res() response: Response, @Query() params?: FiltroRutaDto) {
-    const data = await this.rutaService.listar(params);
+  async mostrarTodo(@Res() response: Response) {
+    const data = await this.rutaService.mostrarTodo();
 
     if (data) {
       response.status(HttpStatus.OK).json({
         msg: 'Lista  de  rutas',
         data,
       });
-    } else {
-      response.status(HttpStatus.BAD_REQUEST).json({
-        msg: 'no rutas',
+    }
+  }
+
+  @Get('/p')
+  async mostrarUno(@Query() id: IdRutaDto, @Res() response: Response) {
+    const data = await this.rutaService.mostrarUno(id);
+
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Lista  de  rutas',
+        data,
+      });
+    }
+  }
+
+  @Get('/filtro')
+  async filtrarActivaInactiva(
+    @Res() response: Response,
+    @Query() params: FiltroRutaDto,
+  ) {
+    const data = await this.rutaService.filtrarActivaInactiva(params);
+
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Lista  de  rutas',
+        data,
       });
     }
   }
@@ -85,8 +108,7 @@ export class RutaController {
     const data = await this.rutaService.eliminar(id);
     if (data) {
       response.status(HttpStatus.OK).json({
-        msg: 'bus eliminado con exito',
-        data,
+        msg: 'Ruta eliminado con exito',
       });
     }
   }

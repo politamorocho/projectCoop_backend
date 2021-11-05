@@ -7,48 +7,51 @@ import { Ruta } from './ruta.entity';
 
 @Schema()
 export class Viaje extends Document {
-  @Prop({ type: Date, require: true })
-  horaSalida: Date;
+  // @Prop({ type: Date, require: true })
+  // horaSalida: Date;
+
+  @Prop({ type: Date, default: new Date(), require: true })
+  fechaHoraSalida: Date = new Date();
+
+  // @Prop({ type: Date, require: true })
+  // horaLlegada: Date;
 
   @Prop({ type: Date, require: true })
-  fechaSalida: Date;
+  fechaHoraLlegada: Date;
 
-  @Prop({ type: Date, require: true })
-  horaLlegada: Date;
-
-  @Prop({ type: Date, require: true })
-  fechaLlegada: Date;
-
-  @Prop({ type: Boolean, require: true })
+  @Prop({ default: true, require: true })
   estado: boolean;
 
   @Prop({
+    require: true,
     type: mongoose.Schema.Types.ObjectId,
     ref: Usuario.name,
     autopopulate: true,
   })
-  usuChoferId: Usuario;
+  usuChoferId: Usuario | Types.ObjectId;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: Usuario.name,
     autopopulate: true,
   })
-  usuAyudanteId: Usuario;
+  usuAyudanteId: Usuario | Types.ObjectId;
 
   @Prop({
+    require: true,
     type: mongoose.Schema.Types.ObjectId,
     ref: Bus.name,
     autopopulate: true,
   })
-  bus: Bus;
+  bus: Bus | Types.ObjectId;
 
   @Prop({
+    require: true,
     type: mongoose.Schema.Types.ObjectId,
     ref: Ruta.name,
     autopopulate: true,
   })
-  ruta: Ruta;
+  ruta: Ruta | Types.ObjectId;
 }
 
 export const ViajeSchema = SchemaFactory.createForClass(Viaje);

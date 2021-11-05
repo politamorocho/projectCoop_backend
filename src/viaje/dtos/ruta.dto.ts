@@ -18,7 +18,7 @@ export class CrearRutaDto {
   @IsString()
   destino: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   estado: boolean;
 }
 

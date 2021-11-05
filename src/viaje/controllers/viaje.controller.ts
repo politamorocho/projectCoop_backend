@@ -10,7 +10,12 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { CrearViajeDto, FiltroViajeDto } from '../dtos/viaje.dto';
+import {
+  CrearViajeDto,
+  ActualizarViajeDto,
+  FiltroViajeDto,
+  AgregarAyudanteViajeDto,
+} from '../dtos/viaje.dto';
 import { ViajeService } from '../services/viaje.service';
 
 @Controller('viaje')
@@ -23,6 +28,21 @@ export class ViajeController {
     if (data) {
       response.status(HttpStatus.OK).json({
         msg: 'viaje creado',
+        data: data,
+      });
+    }
+  }
+
+  @Put('/agrAyudante')
+  async agregarAyudante(
+    @Body() idAyudante: AgregarAyudanteViajeDto,
+    @Query() idViaje: FiltroViajeDto,
+    @Res() response: Response,
+  ) {
+    const data = await this.viajeService.agregarAyudante(idViaje, idAyudante);
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Ayudante agregado, viaje actualizado',
         data: data,
       });
     }
@@ -52,6 +72,33 @@ export class ViajeController {
     } else {
       response.status(HttpStatus.BAD_REQUEST).json({
         msg: 'no rutas',
+      });
+    }
+  }
+
+  @Put()
+  async actualizar(
+    @Query() id: FiltroViajeDto,
+    @Body() viaje: ActualizarViajeDto,
+    @Res() response: Response,
+  ) {
+    const data = await this.viajeService.actualizar(id, viaje);
+
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Viaje Actualizado',
+        data,
+      });
+    }
+  }
+
+  @Delete()
+  async eliminar(@Query() id: FiltroViajeDto, @Res() response: Response) {
+    const data = await this.viajeService.eliminar(id);
+
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Viaje eliminado con existo',
       });
     }
   }

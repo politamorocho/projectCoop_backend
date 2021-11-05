@@ -29,20 +29,18 @@ export class UsuarioService {
     private readonly rolService: RolService,
   ) {}
 
+  //mostrar todos los usuarios en bd
   async mostrarTodo() {
-    console.log(this.usuarioModel.schema.paths);
-    let data = await this.usuarioModel.find();
-    //.populate('rol', '__v').exec();
-
+    let data = await this.usuarioModel.find().exec();
     return data;
   }
 
-  //muestra la info de un usuario enviado por el query
+  //muestra la info de un usuario activo enviado por el query
   async mostrarUno(idUs: IdUsuarioDto) {
     const { id } = idUs;
     const data = await this.usuarioModel
       .findOne({ _id: id })
-      //.populate('rol', '__v')
+
       .exec();
     if (!data) {
       return false;
@@ -54,26 +52,18 @@ export class UsuarioService {
     return data;
   }
 
-  //filtra activos e inactivos
+  //filtra usuarios por activos=1 o inactivos=0 enviado por query
   async filtroActivoInactivo(query: FiltroUsuarioDto) {
     let data;
     const { estado } = query;
     if (estado == 0) {
-      data = await this.usuarioModel
-        .find({ estado: false })
-        // .populate('rol', '-__v')
-        .exec();
+      data = await this.usuarioModel.find({ estado: false }).exec();
       return data;
     }
     if (estado == 1) {
-      data = await this.usuarioModel
-        .find({ estado: true })
-        // .populate('rol', '-__v')
-        .exec();
+      data = await this.usuarioModel.find({ estado: true }).exec();
       return data;
     }
-
-    //  return data;
   }
 
   //busca usuarios por coincidencias de nombres o apellidos o cedula
@@ -86,18 +76,18 @@ export class UsuarioService {
           { apellido: { $regex: `^${busqueda}`, $options: '$i' } },
         ],
       });
-      //  .populate('rol', '-__v');
+
       return data;
     }
 
     if (cedula) {
-      let dato = await this.usuarioModel
-        .find({ cedula: cedula })
-        .populate('rol', '-__v');
+      let dato = await this.usuarioModel.find({ cedula: cedula });
+
       return dato;
     }
   }
 
+  //busca solo por nombre pero no se esta usando
   async busquedaPorNombre(query: FiltroUsuarioDto) {
     const { busqueda } = query;
 
@@ -107,17 +97,16 @@ export class UsuarioService {
         { apellido: { $regex: `^${busqueda}`, $options: '$i' } },
       ],
     });
-    // .populate('rol', '-__v');
 
     if (!data) {
       throw new NotFoundException(`No existen coincidencias`);
     }
 
-    // return data2;
     console.log(data);
     return data;
   }
 
+  //crea usuarios
   async crearUsuario(usuario: CrearUsuarioDto) {
     const correoExiste = await this.usuarioModel.findOne({
       correo: usuario.correo,
@@ -125,7 +114,7 @@ export class UsuarioService {
 
     //si el correo existe, no se puede  crear el usuario
     if (correoExiste) {
-      return new BadRequestException(
+      throw new BadRequestException(
         `El correo ${correoExiste.correo} ya existe`,
       );
     }
@@ -134,7 +123,7 @@ export class UsuarioService {
       cedula: usuario.cedula,
     });
     if (cedulaExiste) {
-      return new BadRequestException(
+      throw new BadRequestException(
         `La cedula ${cedulaExiste.cedula} ya existe`,
       );
     }
@@ -160,7 +149,6 @@ export class UsuarioService {
     //guardar en bd
     const data = await new this.usuarioModel(usuario).save();
 
-    console.log(data, 'data');
     return data;
   }
 
@@ -182,27 +170,34 @@ export class UsuarioService {
       throw new BadRequestException(`no es un usuario activo`);
     }
 
-    //verifica si existe el correo, si existe no puede actualizar
+    // verifica si existe el correo, si es el mismo no hace nada
+    //si es nuevo, verifica que no exista
     if (cambios.correo) {
-      const correoExiste = await this.usuarioModel.findOne({
-        correo: cambios.correo,
-      });
+      if (cambios.correo != data.correo) {
+        const correoExiste = await this.usuarioModel.findOne({
+          correo: cambios.correo,
+        });
 
-      if (correoExiste) {
-        throw new BadRequestException(
-          `el correo ${correoExiste.correo} ya existe`,
-        );
+        if (correoExiste) {
+          throw new BadRequestException(
+            `el correo ${correoExiste.correo} ya existe`,
+          );
+        }
       }
     }
 
+    //verificar si es la misma anterior no hace nada, si es diferente verifca
     if (cambios.cedula) {
-      const cedulaExiste = await this.usuarioModel.findOne({
-        cedula: cambios.cedula,
-      });
-      if (cedulaExiste) {
-        return new BadRequestException(
-          `La cedula ${cedulaExiste.cedula} ya existe`,
-        );
+      if (cambios.cedula !== data.cedula) {
+        const cedulaExiste = await this.usuarioModel.findOne({
+          cedula: cambios.cedula,
+        });
+        if (cedulaExiste) {
+          return new BadRequestException(
+            `La cedula ${cedulaExiste.cedula} ya existe`,
+          );
+        }
+        console.log('Aqui debe llegar la ceudla');
       }
     }
 
@@ -227,8 +222,6 @@ export class UsuarioService {
       data.rol = mongoose.Types.ObjectId(cambios.rol);
     }
 
-    console.log('data:', data);
-
     const actualizado = await this.usuarioModel.findByIdAndUpdate(id, data, {
       new: true,
     });
@@ -243,19 +236,16 @@ export class UsuarioService {
 
     const usuario1 = await this.usuarioModel.findById({ _id: id });
     if (!usuario1) {
-      return false;
+      throw new NotFoundException('No existe el usuario');
     }
 
-    //const anterior = cambios.claveAnterior;
-    console.log(claveAnterior, 'es la clave anterior');
     const siCoincide = await bcryptjs.compare(
       claveAnterior,
       usuario1.claveUsuario,
     );
 
-    console.log(siCoincide, 'resultado comparacion');
     if (!siCoincide) {
-      return false;
+      throw new BadRequestException('Los datos introducidos no coinciden');
     }
 
     const salt = await bcryptjs.genSaltSync(10);
@@ -307,6 +297,15 @@ export class UsuarioService {
       return false;
     }
 
+    return data;
+  }
+
+  async estadoActivoPorId(id: string) {
+    const exist = await this.usuarioModel.findById({ _id: id });
+    if (!exist.estado) {
+      return false;
+    }
+
     return true;
   }
 
@@ -338,40 +337,6 @@ export class UsuarioService {
     if (!data) {
       return false;
     }
-
-    return data;
-  }
-
-  async busquedaUsuarioViaje(idUs: IdUsuarioDto) {
-    const { id } = idUs;
-    const data = await this.usuarioModel.aggregate([
-      { $match: { _id: mongoose.Types.ObjectId(id) } },
-      {
-        $project: {
-          nombre: 1,
-          apellido: 1,
-          cedula: 1,
-          tipo: 1,
-          rol: '$rol.nombre',
-        },
-      },
-      {
-        $lookup: {
-          from: 'viajes',
-          localField: '_id',
-          foreignField: 'usuario_chofer_id',
-          as: 'viaje',
-        },
-      },
-
-      { $unwind: '$viaje' },
-    ]);
-
-    console.log(data, 'lo que sale del viaje');
-
-    const datos = data.forEach((x) => {
-      //x.viaje.bus.populate('bus');
-    });
 
     return data;
   }

@@ -9,7 +9,8 @@ export class Ruta extends Document {
   @Prop({ required: true })
   destino: string;
 
-  estado: Boolean;
+  @Prop({ default: true, required: true })
+  estado: boolean;
 }
 
 export const RutaSchema = SchemaFactory.createForClass(Ruta);
