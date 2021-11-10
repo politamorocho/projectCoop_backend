@@ -21,16 +21,14 @@ export class RolService {
 
   //crea un rol nuevo
   async crearRol(rol: CrearRolDto) {
-    const rolExiste = await this.rolModel.find({
+    const rolExiste = await this.rolModel.findOne({
       nombre: rol.nombre,
     });
-    console.log(rolExiste, 'rol que existe');
 
-    ////falta revisar el control de nombres repetidos///
     //si existe no se crea
-    // if (rolExiste) {
-    //   throw new BadRequestException(`El rol ${rol.nombre} ya existe`);
-    // }
+    if (rolExiste) {
+      throw new BadRequestException(`El rol ${rol.nombre} ya existe`);
+    }
 
     //si no existe lo crea
     const data = await new this.rolModel(rol).save();
@@ -107,6 +105,7 @@ export class RolService {
     return data;
   }
 
+  //elimina un rol por id enviado por query
   async eliminar(query: IdRolDto) {
     const { id } = query;
     const existeId = await this.rolModel.findOne({ _id: id });
@@ -154,11 +153,33 @@ export class RolService {
   async esRolEmpleado(idRol: string) {
     const data = await this.rolModel.findById({ _id: idRol });
     const nombre = data.nombre;
-    const emp: string = 'empleado';
+
+    // const emp: string = 'empleado';
+    const emp: string = process.env.ROL_VIAJE;
     if (nombre.toLowerCase() !== emp.toLowerCase()) {
-      throw new BadRequestException('el usuario no tiene el rol de empleado');
+      throw new BadRequestException('El usuario no tiene el rol de empleado');
     }
 
     return true;
+  }
+
+  async esRolSecretaria() {
+    //var entorno
+    const sec = process.env.ROL_CORREO_2;
+
+    const data = await this.rolModel.findOne({ nombre: sec });
+    if (!data) {
+      return false;
+    }
+    return data;
+  }
+
+  async esRolAdministrador() {
+    const adm = process.env.ROL_CORREO_1;
+    const data = await this.rolModel.findOne({ nombre: adm });
+    if (!data) {
+      return false;
+    }
+    return data;
   }
 }

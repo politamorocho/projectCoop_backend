@@ -8,7 +8,9 @@ import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { ViajeModule } from './viaje/viaje.module';
 import { AuthModule } from './auth/auth.module';
+import { ConfigType } from '@nestjs/config';
 import config from './config';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import config from './config';
         DATABASE_PORT: Joi.number().required(),
       }),
     }),
+
+    EmailModule,
     ViajeModule,
     AuthModule,
   ],

@@ -2,6 +2,7 @@ import * as mongoose from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Rol } from './rol.entity';
+import { TipoEmpleado } from '../models/usuario.tipo.model';
 
 @Schema()
 export class Usuario extends Document {
@@ -11,7 +12,7 @@ export class Usuario extends Document {
   @Prop({})
   apellido: string;
 
-  @Prop({ unique: true })
+  @Prop({})
   correo: string;
 
   @Prop({})
@@ -27,14 +28,29 @@ export class Usuario extends Document {
   })
   rol: Rol | Types.ObjectId;
 
+  @Prop()
+  tipo: TipoEmpleado;
+
   @Prop({ default: true })
   estado: boolean;
+
+  @Prop()
+  codigoRecuperacion: string;
+
+  @Prop()
+  codigoRecuperacionExpira: Date;
 }
 
 export const UsuarioSchema = SchemaFactory.createForClass(Usuario);
 UsuarioSchema.set('timestamps', true);
 UsuarioSchema.plugin(require('mongoose-autopopulate'));
 UsuarioSchema.methods.toJSON = function () {
-  const { __v, claveUsuario, ...data } = this.toObject();
+  const {
+    __v,
+    claveUsuario,
+    codigoRecuperacion,
+    codigoRecuperacionExpira,
+    ...data
+  } = this.toObject();
   return data;
 };

@@ -21,20 +21,24 @@ import { RutaService } from './ruta.service';
 import { FiltroUsuarioDto, IdUsuarioDto } from 'src/usuario/dtos/usuario.dto';
 import { Bus } from '../entities/bus.entity';
 import { RolService } from 'src/usuario/services/rol.service';
+import { SuspensionService } from 'src/usuario/services/suspension.service';
+import { EmailService } from '../../email/services/email.service';
 
 @Injectable()
 export class ViajeService {
   constructor(
     @InjectModel(Viaje.name) private viajeModel: Model<Viaje>,
+
     private usuarioService: UsuarioService,
     private rolService: RolService,
     private busService: BusService,
     private rutaService: RutaService,
+    private suspensionService: SuspensionService,
+    private emailService: EmailService,
   ) {}
 
   //crear un viaje
   async crearViaje(viaje: CrearViajeDto) {
-    console.log(viaje, 'viaje que se arma');
     //verificar que el usuario Chofer exista y este activo en db
 
     const actEmp = await this.verificarActivoEmpleado(viaje.usuChoferId);
@@ -44,17 +48,37 @@ export class ViajeService {
 
     //verificar que el bus exista y este activo
 
-    if (!this.busService.existeBusActivoId(viaje.bus)) {
+    if (!(await this.busService.existeBusActivoId(viaje.bus))) {
       throw new BadRequestException('no existe bus con ese id');
     }
 
     //verificar que la ruta  y este activa
-    if (!this.rutaService.existeRutaActivaId(viaje.ruta)) {
+    if (!(await this.rutaService.existeRutaActivaId(viaje.ruta))) {
       throw new BadRequestException('no existe ruta con ese id');
     }
 
     const data = await new this.viajeModel(viaje).save();
-    console.log('data', data);
+
+    //verificar si el usuario tiene suspensiones activas al momento del viaje y guardar el id
+    const sus = await this.enviarCorreoPorSuspension(
+      viaje.usuChoferId,
+      actEmp.nombre,
+      actEmp.apellido,
+    );
+
+    //guardar el id
+    if (sus) {
+      await data.suspensionActiva.push(sus._id);
+      await data.save();
+      // await this.viajeModel.findByIdAndUpdate(
+      //   data._id,
+      //   { suspensionActiva: sus._id },
+      //   { new: true },
+      // );
+      // data.suspensionActiva = sus._id;
+    }
+    //const data = new this.viajeModel(viaje).save();
+
     return data;
   }
 
@@ -72,7 +96,7 @@ export class ViajeService {
     }
 
     if (!viaje.estado) {
-      throw new NotFoundException('Elviaje es inactivo');
+      throw new NotFoundException('El viaje es inactivo');
     }
 
     //verificar que sea empleadoactivo
@@ -81,21 +105,47 @@ export class ViajeService {
       throw new BadRequestException('El usuario seleccionado es invalido');
     }
 
+    //verificar que el ayudante no este registrado para este mismo viaje
+    if (viaje.usuChoferId === actEmp._id) {
+      throw new BadRequestException(
+        'No puede registrar 2 veces al mismo usuario para este viaje',
+      );
+    }
+
+    //verificar si el usuario tiene suspensiones activas al momento del viaje y guardar el id
+    const sus = await this.enviarCorreoPorSuspension(
+      usuAyudanteId,
+      actEmp.nombre,
+      actEmp.apellido,
+    );
+
     const data = await this.viajeModel.findByIdAndUpdate(
       id,
       { usuAyudanteId: usuAyudanteId },
       { new: true },
     );
-    console.log('data', data);
+
+    if (sus) {
+      await data.suspensionActiva.push(sus._id);
+      // const data = await this.viajeModel.findByIdAndUpdate(
+      //   id,
+      //   { suspensionActiva: sus._id },
+      //   { new: true },
+      // );
+      await data.save();
+    }
+
     return data;
   }
 
+  //muestra todos los viajes activos o inactivos
   async listarTodo() {
     //   console.log(this.viajeModel.schema.paths);
 
     return this.viajeModel.find().exec();
   }
 
+  //elimina un viaje
   async eliminar(idViaje: FiltroViajeDto) {
     const { id } = idViaje;
     const existe = await this.viajeModel.findById({ _id: id });
@@ -113,6 +163,7 @@ export class ViajeService {
     return data;
   }
 
+  //muestra los viajes de un usuario id
   async viajePorUsuario(idUs: FiltroViajeDto) {
     const { id } = idUs;
     const usExiste = await this.usuarioService.existeUsuarioIdRetUs(id);
@@ -127,6 +178,7 @@ export class ViajeService {
     return data;
   }
 
+  //actualiza un viaje
   async actualizar(idVi: FiltroViajeDto, viaje: ActualizarViajeDto) {
     const { id } = idVi;
 
@@ -176,7 +228,7 @@ export class ViajeService {
     const usChofActivo = await this.usuarioService.estadoActivoPorId(id);
 
     if (!usChofActivo) {
-      throw new BadRequestException('no es usuario chofer activo');
+      throw new BadRequestException('no es usuario empleado activo');
     }
 
     //verifica que tenga un rol empleado
@@ -184,6 +236,47 @@ export class ViajeService {
       throw new BadRequestException('No es un usuario empleado');
     }
 
-    return true;
+    return usChofer;
+  }
+
+  //si el chofer o el ayudante tienen suspensiones activas guarda el id para  mostrar la info del viaje
+  async enviarCorreoPorSuspension(id: string, nomEmp: string, apeEmp: string) {
+    const susActiva = await this.suspensionService.suspensionActivaPorId(id);
+
+    if (susActiva) {
+      const dat = susActiva._id;
+      const secretaria = await this.usuarioService.esSecretaria();
+      const administrador = await this.usuarioService.esAdministrador();
+
+      if (secretaria) {
+        const correo = secretaria.correo;
+        const nomSec = secretaria.nombre;
+        const empNombre = nomEmp;
+        const empApellido = apeEmp;
+
+        const enviar = this.emailService.enviarCorreo(
+          correo,
+          nomSec,
+          empNombre,
+          empApellido,
+        );
+      }
+
+      if (administrador) {
+        const correo = administrador.correo;
+        const nomAdm = administrador.nombre;
+        const empNombre = nomEmp;
+        const empApellido = apeEmp;
+
+        const enviar = this.emailService.enviarCorreo(
+          correo,
+          nomAdm,
+          empNombre,
+          empApellido,
+        );
+      }
+      return susActiva;
+    }
+    return false;
   }
 }

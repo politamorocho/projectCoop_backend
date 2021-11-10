@@ -19,8 +19,14 @@ import {
 export class RutaService {
   constructor(@InjectModel(Ruta.name) private rutaModel: Model<Ruta>) {}
 
-  //crear un bus
+  //crear un ruta
   async crearRuta(ruta: CrearRutaDto) {
+    if (ruta.origen.toLowerCase() == ruta.destino.toLowerCase()) {
+      throw new BadRequestException(
+        `La ruta ha crear no puede tener el mismo origen y destino`,
+      );
+    }
+
     const existeRuta = await this.rutaModel.findOne({
       origen: ruta.origen,
       destino: ruta.destino,
@@ -43,6 +49,7 @@ export class RutaService {
     return data;
   }
 
+  //la info de una ruta por id enviado por query
   async mostrarUno(idRuta: IdRutaDto) {
     const { id } = idRuta;
     const data = await this.rutaModel.findOne({ _id: id }).exec();
@@ -53,6 +60,7 @@ export class RutaService {
     return data;
   }
 
+  //filtra rutas activas=1 o inactivas=0, por estado enviado por query
   async filtrarActivaInactiva(params: FiltroRutaDto) {
     let lista;
 
@@ -70,6 +78,7 @@ export class RutaService {
     // return lista;
   }
 
+  //busca rutas coincidentes por origen o destino
   async buscarPorOrigenODestino(params: FiltroRutaDto) {
     //si no viene ningun filtro,muestra todas las rutas
     let data = await this.rutaModel.find().exec();
@@ -86,6 +95,7 @@ export class RutaService {
     return data;
   }
 
+  //actualiza una ruta
   async actualizar(idRut: IdRutaDto, rutaAct: ActualizarRutaDto) {
     const { id } = idRut;
     const existeId = await this.rutaModel.findOne({ _id: id });
@@ -110,6 +120,7 @@ export class RutaService {
     return data;
   }
 
+  //elimina una ruta
   async eliminar(idRut: IdRutaDto) {
     const { id } = idRut;
     const existeId = await this.rutaModel.findOne({ _id: id });

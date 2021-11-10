@@ -1,4 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
+import { TipoEmpleado } from '../models/usuario.tipo.model';
 import {
   IsBoolean,
   IsEmail,
@@ -8,6 +9,7 @@ import {
   IsString,
   Max,
   Min,
+  IsEnum,
 } from 'class-validator';
 
 export class CrearUsuarioDto {
@@ -38,7 +40,8 @@ export class CrearUsuarioDto {
   rol: string;
 
   @IsOptional()
-  tipo: string;
+  @IsEnum(TipoEmpleado)
+  tipo: TipoEmpleado;
 
   @IsOptional()
   @IsBoolean()
@@ -74,4 +77,20 @@ export class CambiarClaveDto {
   @IsNotEmpty()
   @IsString()
   claveNueva: string;
+}
+
+export class RecuperarClaveDto {
+  @IsNotEmpty()
+  @IsEmail()
+  correo: string;
+}
+
+export class FijarNuevaClaveDto {
+  @IsNotEmpty()
+  @IsString()
+  claveNueva: string;
+
+  @IsNotEmpty()
+  @IsString()
+  codigo: string;
 }

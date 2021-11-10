@@ -43,6 +43,7 @@ export class BusService {
     return data;
   }
 
+  //muestra todos los buses en db
   async mostrarTodo() {
     const data = await this.busModel.find().exec();
 
@@ -60,7 +61,7 @@ export class BusService {
     return data;
   }
 
-  //listar todos los buses y separados por activos o inactivos
+  //listar todos los buses y separados por activos=1 o inactivos=0
   async listar(params: FiltroBusDto) {
     let busqueda;
 
@@ -125,6 +126,7 @@ export class BusService {
     return data;
   }
 
+  //elimina un bus
   async eliminar(idBus: IdBusDto) {
     const { id } = idBus;
     const existeId = await this.busModel.findOne({ _id: id });

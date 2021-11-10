@@ -9,7 +9,7 @@ export class Rol extends Document {
   @Prop({ require: true })
   descripcion: string;
 
-  @Prop({ default: true, require: true })
+  @Prop({ default: true })
   estado: boolean;
 }
 

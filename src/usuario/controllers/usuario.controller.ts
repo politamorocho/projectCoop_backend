@@ -18,6 +18,8 @@ import {
   FiltroUsuarioDto,
   IdUsuarioDto,
   CambiarClaveDto,
+  RecuperarClaveDto,
+  FijarNuevaClaveDto,
 } from '../dtos/usuario.dto';
 import { UsuarioService } from '../services/usuario.service';
 
@@ -130,6 +132,34 @@ export class UsuarioController {
     if (data) {
       response.status(HttpStatus.OK).json({
         msg: 'clave cambiada con exito',
+      });
+    }
+  }
+
+  //envia el codigo de verifiacion de segurirdad para fijar nueva clave
+  @Post('/enviarCodigo')
+  async enviarCodigoRecuperacion(
+    @Body() correo: RecuperarClaveDto,
+    @Res() response: Response,
+  ) {
+    const data = await this.usuarioService.enviarCorreoRecuperarClave(correo);
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'clave enviada a su correo, tiene 15 minutos para ingresarlo',
+      });
+    }
+  }
+
+  //con el codigo enviado se fija una nueva clave
+  @Put('/nuevaClave')
+  async asignarNuevaClave(
+    @Body() info: FijarNuevaClaveDto,
+    @Res() response: Response,
+  ) {
+    const data = await this.usuarioService.asignarNuevaClave(info);
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Clave cambiada con exito',
       });
     }
   }

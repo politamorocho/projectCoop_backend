@@ -10,16 +10,22 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as bcryptjs from 'bcrypt';
 const mongoose = require('mongoose');
 import { isMongoId } from 'class-validator';
+//import * as moment from 'moment-timezone';
 import { Usuario } from '../entities/usuario.entity';
 
+//todas estan en la clase usuario.dto
 import {
   ActualizarUsuarioDto,
   CrearUsuarioDto,
   FiltroUsuarioDto,
   IdUsuarioDto,
   CambiarClaveDto,
+  RecuperarClaveDto,
+  FijarNuevaClaveDto,
 } from '../dtos/usuario.dto';
 import { RolService } from './rol.service';
+import * as moment from 'moment';
+import { EmailService } from 'src/email/services/email.service';
 
 @Injectable()
 export class UsuarioService {
@@ -27,6 +33,7 @@ export class UsuarioService {
     @InjectModel(Usuario.name) private usuarioModel: Model<Usuario>,
 
     private readonly rolService: RolService,
+    private emailService: EmailService,
   ) {}
 
   //mostrar todos los usuarios en bd
@@ -108,17 +115,19 @@ export class UsuarioService {
 
   //crea usuarios
   async crearUsuario(usuario: CrearUsuarioDto) {
-    const correoExiste = await this.usuarioModel.findOne({
-      correo: usuario.correo,
-    });
+    //si es un usuario con correo lo verifica si no, no
+    if (usuario.correo) {
+      const correoExiste = await this.usuarioModel.findOne({
+        correo: usuario.correo,
+      });
 
-    //si el correo existe, no se puede  crear el usuario
-    if (correoExiste) {
-      throw new BadRequestException(
-        `El correo ${correoExiste.correo} ya existe`,
-      );
+      //si el correo existe, no se puede  crear el usuario
+      if (correoExiste) {
+        throw new BadRequestException(
+          `El correo ${correoExiste.correo} ya existe`,
+        );
+      }
     }
-
     const cedulaExiste = await this.usuarioModel.findOne({
       cedula: usuario.cedula,
     });
@@ -143,9 +152,10 @@ export class UsuarioService {
     //si no existe el correo y existe el rol, entonces crea el usuario
     // if (!correoExiste) {
     //encriptar la clave
-    const salt = bcryptjs.genSaltSync(10);
-    usuario.claveUsuario = bcryptjs.hashSync(usuario.claveUsuario, salt);
-
+    if (usuario.claveUsuario) {
+      const salt = bcryptjs.genSaltSync(10);
+      usuario.claveUsuario = bcryptjs.hashSync(usuario.claveUsuario, salt);
+    }
     //guardar en bd
     const data = await new this.usuarioModel(usuario).save();
 
@@ -230,6 +240,7 @@ export class UsuarioService {
     return actualizado;
   }
 
+  //para actualizar la clave
   async verificarClave(idUs: IdUsuarioDto, cambios: CambiarClaveDto) {
     const { id } = idUs;
     const { claveAnterior, claveNueva } = cambios;
@@ -259,6 +270,7 @@ export class UsuarioService {
     return true;
   }
 
+  //eliminar un usuario
   async eliminar(idUs: IdUsuarioDto) {
     const { id } = idUs;
     const existeId = await this.usuarioModel.findOne({ _id: id });
@@ -279,6 +291,95 @@ export class UsuarioService {
     return data;
   }
 
+  //recuperar claveUsuario por codigo enviado al correo
+  async enviarCorreoRecuperarClave(correoUs: RecuperarClaveDto) {
+    const { correo } = correoUs;
+    const siCorreo = await this.usuarioModel.findOne({ correo: correo });
+
+    if (!siCorreo) {
+      throw new NotFoundException('No existe el correo en db');
+    }
+    const nombre = siCorreo.nombre;
+    const corr = siCorreo.correo;
+    const codigo = await this.agregarCodigoRecuperacion(siCorreo._id);
+
+    this.emailService.enviarRecuperacionClave(nombre, corr, codigo);
+    return true;
+  }
+
+  //metodo para generar el codigo a enviar
+  generarCodigo() {
+    return (
+      Math.random().toString(36).substring(2, 5) +
+      Math.random().toString(36).substring(2, 5)
+    );
+  }
+
+  //fijar el codigo y tiempo generado al usuario correspondiente
+  async agregarCodigoRecuperacion(id: string) {
+    const codigo = this.generarCodigo();
+    const actualizado = await this.usuarioModel.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          codigoRecuperacion: codigo,
+          codigoRecuperacionExpira: moment().add(15, 'minutes'),
+        },
+      },
+      { new: true },
+    );
+    return codigo;
+  }
+
+  //verifica el tiempo de caducidad del codigo enviado por correo
+  async verificarCaducidadCodigo(codigo: string) {
+    const usuario = await this.usuarioModel.findOne({
+      codigoRecuperacion: codigo,
+    });
+
+    if (!usuario) {
+      return false;
+    }
+
+    const hoy = moment().format('YYYY-MM-DD HH:mm:ss');
+    if (
+      hoy <
+      moment(usuario.codigoRecuperacionExpira).format('YYYY-MM-DD HH:mm:ss')
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //fija la nueva clave del usuario verificando el tiempo de caducidad
+  async asignarNuevaClave(info: FijarNuevaClaveDto) {
+    const { claveNueva, codigo } = info;
+    const codigoExiste = await this.usuarioModel.findOne({
+      codigoRecuperacion: codigo,
+    });
+    if (!codigoExiste) {
+      throw new NotFoundException('No coincide el codigo');
+    }
+
+    const aTiempo = await this.verificarCaducidadCodigo(codigo);
+    if (!aTiempo) {
+      throw new BadRequestException('El codigo ha caducado');
+    }
+
+    const salt = await bcryptjs.genSaltSync(10);
+    const nueva = await bcryptjs.hashSync(claveNueva, salt);
+
+    const actualizado = await this.usuarioModel.findByIdAndUpdate(
+      codigoExiste._id,
+      { $set: { claveUsuario: nueva } },
+      { new: true },
+    );
+
+    return true;
+  }
+
+  //existe un usurio retorna un usuario
   async existeUsuarioIdRetUs(id: string) {
     const data = await this.usuarioModel.findById({ _id: id });
     //.populate('rol', '-__v');
@@ -331,7 +432,6 @@ export class UsuarioService {
   }
 
   async existeUsuarioPorCedula(cedulaUs: string) {
-    console.log(cedulaUs, 'cedla usservi');
     const data = await this.usuarioModel.findOne({ cedula: cedulaUs }).exec();
 
     if (!data) {
@@ -339,5 +439,34 @@ export class UsuarioService {
     }
 
     return data;
+  }
+
+  //busca a un usuario con rol secretaria para obtener su email
+  async esSecretaria() {
+    const esSecretaria = await this.rolService.esRolSecretaria();
+    if (!esSecretaria) {
+      return false;
+    }
+
+    const sec = await this.usuarioModel.findOne({ rol: esSecretaria._id });
+    if (!sec) {
+      return false;
+    }
+
+    // const correo= sec.correo;
+    return sec;
+  }
+
+  //busca a un usuario con rol administrador para obtener su email
+  async esAdministrador() {
+    const esAdministrador = await this.rolService.esRolAdministrador();
+    if (!esAdministrador) {
+      return false;
+    }
+    const adm = await this.usuarioModel.findOne({ rol: esAdministrador._id });
+    if (!adm) {
+      return false;
+    }
+    return adm;
   }
 }

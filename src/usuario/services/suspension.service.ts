@@ -8,6 +8,7 @@ import { isMongoId } from 'class-validator';
 import { Db } from 'mongodb';
 import { Model, FilterQuery } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import * as moment from 'moment';
 import { Suspension } from '../entities/suspension.entity';
 import { UsuarioService } from './usuario.service';
 import { IdUsuarioDto } from '../dtos/usuario.dto';
@@ -43,11 +44,14 @@ export class SuspensionService {
     return existeId;
   }
 
+  //inactivar automaticamente la suspension cuando se cumpla la fecha final
   async inactivarSuspension(id: string) {
     const existeId = await this.suspensionModel.findById({ _id: id });
-    const fechaHoy = new Date().toISOString();
 
-    if (fechaHoy == existeId.final.toISOString()) {
+    const hoy = moment().format('YYYY-MM-DD');
+    const fin = moment(existeId.final).format('YYYY-MM-DD');
+
+    if (hoy > fin) {
       const estado = await this.suspensionModel.findByIdAndUpdate(
         id,
         { estado: false },
@@ -58,6 +62,7 @@ export class SuspensionService {
     }
   }
 
+  //filtra suspensiones activas=1 o inactivas=0,por estado enviado al query
   async filtroActivaInactiva(query: FiltroSuspensionDto) {
     const { estado } = query;
 
@@ -75,27 +80,20 @@ export class SuspensionService {
 
   //muestra todas las suspensiones en db
   async mostrarTodas() {
-    //console.log(new Date().toUTCString());
-    const data = await this.suspensionModel
-      .find()
-      // .populate('Usuario', '-claveUsuario')
-      .exec();
-    // console.log(new Date().getDay());
+    const data = await this.suspensionModel.find().exec();
     return data;
   }
 
+  //info de uuna suspension por id enviado al query
+  async mostrarUna(idSus: IdSuspensionDto) {
+    const { id } = idSus;
+    const data = await this.suspensionModel.findOne({ _id: id });
 
-  async mostrarUna(idSus: IdSuspensionDto ){
-    const {id} = idSus;
-    const data = await this.suspensionModel
-    .findOne({_id:id});
-
-    if(!data){
-      throw new NotFoundException('No existe suspension con ese id')
+    if (!data) {
+      throw new NotFoundException('No existe suspension con ese id');
     }
 
     return data;
-
   }
 
   //mostrar listado de suspensiones activos o inactivas por rango de fecha
@@ -159,6 +157,8 @@ export class SuspensionService {
   // }
 
   //Muestra todas las suspensiones de un usuario por id enviado por query
+
+  //suspensiones de usuario por id enviado por query
   async susPorUsuario(idUs: IdUsuarioDto) {
     const { id } = idUs;
     if (!this.usuarioService.existeUsuarioId(id)) {
@@ -252,6 +252,7 @@ export class SuspensionService {
     return data;
   }
 
+  //actualizar una suspension
   async actualizar(idSus: IdSuspensionDto, susActual: ActualizarSuspensionDto) {
     const { id } = idSus;
     const existeId = await this.suspensionModel.findOne({ _id: id });
@@ -274,5 +275,22 @@ export class SuspensionService {
       { new: true },
     );
     return data;
+  }
+
+  async suspensionActivaPorId(idUsuario: string) {
+    const existe = await this.suspensionModel.findOne({ usuario: idUsuario });
+
+    if (!existe) {
+      return false;
+    }
+
+    if (!existe.estado) {
+      return false;
+    }
+
+    if (existe.estado) {
+      return existe;
+    }
+    return existe;
   }
 }

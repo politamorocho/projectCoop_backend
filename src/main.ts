@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import * as moment from 'moment-timezone';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +16,8 @@ async function bootstrap() {
   );
 
   app.enableCors();
+  moment().tz('America/Bogota').format();
+  moment.tz.setDefault('America/Bogota');
   await app.listen(3100);
 }
 bootstrap();

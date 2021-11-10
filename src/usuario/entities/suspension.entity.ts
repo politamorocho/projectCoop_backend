@@ -14,13 +14,16 @@ export class Suspension extends Document {
   @Prop({ required: true })
   descripcion: string;
 
-  @Prop({ required: true })
+  @Prop({ default: true })
   estado: boolean;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: Usuario.name,
-    autopopulate: { select: '-claveUsuario -__v' },
+    autopopulate: {
+      select:
+        ' -claveUsuario -__v  -codigoRecuperacion -codigoRecuperacionExpira',
+    },
   })
   usuario: Usuario | Types.ObjectId;
 }

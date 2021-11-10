@@ -4,6 +4,7 @@ import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 import { Usuario } from 'src/usuario/entities/usuario.entity';
 import { Bus } from './bus.entity';
 import { Ruta } from './ruta.entity';
+import { Suspension } from 'src/usuario/entities/suspension.entity';
 
 @Schema()
 export class Viaje extends Document {
@@ -26,14 +27,20 @@ export class Viaje extends Document {
     require: true,
     type: mongoose.Schema.Types.ObjectId,
     ref: Usuario.name,
-    autopopulate: true,
+    autopopulate: {
+      select:
+        ' -claveUsuario -__v -rol -codigoRecuperacion -codigoRecuperacionExpira',
+    },
   })
   usuChoferId: Usuario | Types.ObjectId;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: Usuario.name,
-    autopopulate: true,
+    autopopulate: {
+      select:
+        ' -claveUsuario -__v -rol -codigoRecuperacion -codigoRecuperacionExpira',
+    },
   })
   usuAyudanteId: Usuario | Types.ObjectId;
 
@@ -41,7 +48,7 @@ export class Viaje extends Document {
     require: true,
     type: mongoose.Schema.Types.ObjectId,
     ref: Bus.name,
-    autopopulate: true,
+    autopopulate: { select: '_id placa numeroDisco estado' },
   })
   bus: Bus | Types.ObjectId;
 
@@ -49,9 +56,16 @@ export class Viaje extends Document {
     require: true,
     type: mongoose.Schema.Types.ObjectId,
     ref: Ruta.name,
-    autopopulate: true,
+    autopopulate: { select: '_id origen destino estado' },
   })
   ruta: Ruta | Types.ObjectId;
+
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId }],
+    ref: Suspension.name,
+    autopopulate: { select: '_id inicio final descripcion' },
+  })
+  suspensionActiva: Types.Array<Suspension>;
 }
 
 export const ViajeSchema = SchemaFactory.createForClass(Viaje);

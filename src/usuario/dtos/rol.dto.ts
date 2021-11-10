@@ -19,7 +19,7 @@ export class CrearRolDto {
   @IsString()
   descripcion: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsBoolean()
   estado: boolean;
 }

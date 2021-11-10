@@ -26,7 +26,7 @@ export class CrearSuspensionDto {
   @IsNotEmpty()
   descripcion: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsBoolean()
   estado: boolean;
 
