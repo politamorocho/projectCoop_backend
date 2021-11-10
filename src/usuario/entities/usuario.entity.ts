@@ -6,19 +6,19 @@ import { TipoEmpleado } from '../models/usuario.tipo.model';
 
 @Schema()
 export class Usuario extends Document {
-  @Prop({})
+  @Prop()
   nombre: string;
 
-  @Prop({})
+  @Prop()
   apellido: string;
 
-  @Prop({})
+  @Prop()
   correo: string;
 
-  @Prop({})
+  @Prop()
   cedula: string;
 
-  @Prop({})
+  @Prop()
   claveUsuario: string;
 
   @Prop({

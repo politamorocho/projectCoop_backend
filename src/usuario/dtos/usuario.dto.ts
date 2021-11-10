@@ -22,7 +22,7 @@ export class CrearUsuarioDto {
   apellido: string;
 
   @IsOptional()
-  @IsEmail()
+  //@IsEmail()
   correo: string;
 
   @IsOptional()
