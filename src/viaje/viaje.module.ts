@@ -10,6 +10,7 @@ import { ViajeService } from './services/viaje.service';
 import { RutaService } from './services/ruta.service';
 import { BusService } from './services/bus.service';
 import { UsuarioModule } from 'src/usuario/usuario.module';
+import { ReporteViajeController } from './controllers/reporte.viaje.controller';
 
 @Module({
   imports: [
@@ -20,7 +21,12 @@ import { UsuarioModule } from 'src/usuario/usuario.module';
       { name: Viaje.name, schema: ViajeSchema },
     ]),
   ],
-  controllers: [ViajeController, RutaController, BusController],
+  controllers: [
+    ViajeController,
+    RutaController,
+    BusController,
+    ReporteViajeController,
+  ],
   providers: [ViajeService, RutaService, BusService],
 })
 export class ViajeModule {}

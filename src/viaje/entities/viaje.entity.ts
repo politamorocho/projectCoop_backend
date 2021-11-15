@@ -12,16 +12,10 @@ export class Viaje extends Document {
   // horaSalida: Date;
 
   @Prop({ type: Date, default: new Date(), require: true })
-  fechaHoraSalida: Date = new Date();
+  fechaHoraSalida: Date;
 
-  // @Prop({ type: Date, require: true })
-  // horaLlegada: Date;
-
-  @Prop({ type: Date, require: true })
-  fechaHoraLlegada: Date;
-
-  @Prop({ default: true, require: true })
-  estado: boolean;
+  @Prop({ type: Date })
+  fechaHoraLlegadaAprox: Date;
 
   @Prop({
     require: true,
@@ -29,20 +23,26 @@ export class Viaje extends Document {
     ref: Usuario.name,
     autopopulate: {
       select:
-        ' -claveUsuario -__v -rol -codigoRecuperacion -codigoRecuperacionExpira',
+        ' -claveUsuario -__v -rol -codigoRecuperacion -codigoRecuperacionExpira -tipo',
     },
   })
-  usuChoferId: Usuario | Types.ObjectId;
+  empleado1: Usuario | Types.ObjectId;
+
+  @Prop()
+  tipoEmpleado1: string;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: Usuario.name,
     autopopulate: {
       select:
-        ' -claveUsuario -__v -rol -codigoRecuperacion -codigoRecuperacionExpira',
+        ' -claveUsuario -__v -rol -codigoRecuperacion -codigoRecuperacionExpira -tipo',
     },
   })
-  usuAyudanteId: Usuario | Types.ObjectId;
+  empleado2: Usuario | Types.ObjectId;
+
+  @Prop()
+  tipoEmpleado2: string;
 
   @Prop({
     require: true,

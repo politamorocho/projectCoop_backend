@@ -13,12 +13,12 @@ import {
 } from 'class-validator';
 
 export class CrearUsuarioDto {
-  @IsNotEmpty()
-  @IsString()
+  @IsNotEmpty({ message: 'No se permiten campos vacios' })
+  @IsString({ message: 'Debe ingresar un nombre válido' })
   nombre: string;
 
-  @IsNotEmpty()
-  @IsString()
+  @IsNotEmpty({ message: 'No se permiten campos vacios' })
+  @IsString({ message: 'Debe ingresar un apellido válido' })
   apellido: string;
 
   @IsOptional()
@@ -35,8 +35,8 @@ export class CrearUsuarioDto {
   //@Min(8)
   claveUsuario: string;
 
-  @IsMongoId()
-  @IsNotEmpty()
+  @IsMongoId({ message: 'Debe ingresar un rol válido' })
+  @IsNotEmpty({ message: 'No se permiten campos vacios' })
   rol: string;
 
   @IsOptional()
@@ -63,7 +63,7 @@ export class FiltroUsuarioDto {
   cedula: string;
 }
 
-export class IdUsuarioDto {
+export class IdDto {
   @IsNotEmpty()
   @IsMongoId()
   id: string;

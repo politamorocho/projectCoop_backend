@@ -11,12 +11,12 @@ import {
 } from 'class-validator';
 
 export class CrearBusDto {
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: 'Debe ingresar una placa válida' })
+  @IsNotEmpty({ message: 'Debe ingresar una placa válida' })
   placa: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: 'Debe ingresar un numero válido' })
+  @IsNotEmpty({ message: 'Debe ingresar un numero válido' })
   numeroDisco: string;
 
   @IsOptional()

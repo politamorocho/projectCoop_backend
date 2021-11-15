@@ -23,7 +23,7 @@ export class RutaService {
   async crearRuta(ruta: CrearRutaDto) {
     if (ruta.origen.toLowerCase() == ruta.destino.toLowerCase()) {
       throw new BadRequestException(
-        `La ruta ha crear no puede tener el mismo origen y destino`,
+        `La ruta no puede tener el mismo origen y destino`,
       );
     }
 
@@ -49,13 +49,18 @@ export class RutaService {
     return data;
   }
 
+  async soloActivos() {
+    let data = await this.rutaModel.find({ estado: true }).exec();
+    return data;
+  }
+
   //la info de una ruta por id enviado por query
   async mostrarUno(idRuta: IdRutaDto) {
     const { id } = idRuta;
     const data = await this.rutaModel.findOne({ _id: id }).exec();
 
     if (!data) {
-      throw new BadRequestException('No existe ruta con ese id');
+      throw new BadRequestException('No existe la ruta');
     }
     return data;
   }
@@ -86,9 +91,14 @@ export class RutaService {
     const { lugar } = params;
 
     data = await this.rutaModel.find({
-      $or: [
-        { origen: { $regex: `^${lugar}`, $options: '$i' } },
-        { destino: { $regex: `^${lugar}`, $options: '$i' } },
+      $and: [
+        { estado: true },
+        {
+          $or: [
+            { origen: { $regex: `^${lugar}`, $options: '$i' } },
+            { destino: { $regex: `^${lugar}`, $options: '$i' } },
+          ],
+        },
       ],
     });
 
@@ -102,13 +112,13 @@ export class RutaService {
 
     if (!existeId) {
       throw new NotFoundException(
-        `No se puede actualizar porque no existe ruta con id: ${id}`,
+        `No se puede actualizar porque no existe ruta`,
       );
     }
 
     if (!existeId.estado) {
       throw new BadRequestException(
-        `no se puede actualizar la ruta porque es inactivo`,
+        `No se puede actualizar porque no existe ruta`,
       );
     }
 
@@ -129,7 +139,7 @@ export class RutaService {
       throw new NotFoundException(`la ruta no existe`);
     }
     if (!existeId.estado) {
-      throw new BadRequestException(`La ruta no esta activa`);
+      throw new BadRequestException(`La ruta no está activa`);
     }
 
     const data = await this.rutaModel.findByIdAndUpdate(
@@ -152,6 +162,6 @@ export class RutaService {
       return false;
     }
 
-    return true;
+    return siExiste;
   }
 }

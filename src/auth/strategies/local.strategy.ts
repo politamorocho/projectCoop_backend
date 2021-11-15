@@ -5,18 +5,18 @@ import { AuthService } from '../services/auth.service';
 //passport local hace la compracion cn la base de datos
 
 @Injectable()
-export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
+export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
     super({
       usernameField: 'cedula',
-      passwordFiel: 'clave',
+      passwordField: 'clave',
     });
   }
 
-  async validate({ cedula, clave }: { cedula: string; clave: string }) {
-    const usuario = await this.authService.validarUsuario(cedula, clave);
+  async validate(username: string, password: string): Promise<any> {
+    const usuario = await this.authService.validarUsuario(username, password);
     if (!usuario) {
-      throw new UnauthorizedException('No está autorizado');
+      throw new UnauthorizedException('Usuario no autorizado');
     }
     return usuario;
   }

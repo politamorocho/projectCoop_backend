@@ -27,7 +27,9 @@ export default registerAs('config', () => {
 
     jwtSecret: process.env.JWT_SECRET,
 
-    rolViaje:process.env.ROL_VIAJE,
+    rolViaje: process.env.ROL_VIAJE,
+
+    headerName: process.env.HEADER_NAME,
 
     enviarCorreos: {
       rolCorreo1: process.env.ROL_CORREO_1,

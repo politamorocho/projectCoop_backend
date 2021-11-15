@@ -9,20 +9,23 @@ import {
   Query,
   Res,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 import {
   CrearUsuarioDto,
   ActualizarUsuarioDto,
   FiltroUsuarioDto,
-  IdUsuarioDto,
+  IdDto,
   CambiarClaveDto,
   RecuperarClaveDto,
   FijarNuevaClaveDto,
 } from '../dtos/usuario.dto';
 import { UsuarioService } from '../services/usuario.service';
 
+//@UseGuards(JwtAuthGuard)
 @Controller('usuario')
 export class UsuarioController {
   constructor(private usuarioService: UsuarioService) {}
@@ -40,9 +43,32 @@ export class UsuarioController {
     }
   }
 
+  @Get('/activos')
+  async soloActivos(@Res() response: Response) {
+    const data = await this.usuarioService.soloActivos();
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Lista  del usuarios activos',
+        data,
+      });
+    }
+  }
+
+  //empleados activos
+  @Get('/empActivo')
+  async empleadoActivo(@Res() response: Response) {
+    const data = await this.usuarioService.empleadoActivo();
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Lista  de empleados activos',
+        data,
+      });
+    }
+  }
+
   //info de un usuario activo buscado por id enviado por query
   @Get('/p')
-  async mostrarUno(@Query() id: IdUsuarioDto, @Res() response: Response) {
+  async mostrarUno(@Query() id: IdDto, @Res() response: Response) {
     const data = await this.usuarioService.mostrarUno(id);
     if (data) {
       response.status(HttpStatus.OK).json({
@@ -99,7 +125,7 @@ export class UsuarioController {
 
   @Put()
   async actualizar(
-    @Query() id: IdUsuarioDto,
+    @Query() id: IdDto,
     @Body() usAct: ActualizarUsuarioDto,
     @Res() response: Response,
   ) {
@@ -113,7 +139,7 @@ export class UsuarioController {
   }
 
   @Delete()
-  async eliminar(@Query() id: IdUsuarioDto, @Res() response: Response) {
+  async eliminar(@Query() id: IdDto, @Res() response: Response) {
     const data = await this.usuarioService.eliminar(id);
     if (data) {
       response.status(HttpStatus.OK).json({
@@ -124,7 +150,7 @@ export class UsuarioController {
 
   @Put('/actClave')
   async actualizarClave(
-    @Query() idUs: IdUsuarioDto,
+    @Query() idUs: IdDto,
     @Body() cambios: CambiarClaveDto,
     @Res() response: Response,
   ) {

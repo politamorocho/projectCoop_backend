@@ -11,40 +11,32 @@ import {
 } from 'class-validator';
 
 export class CrearViajeDto {
-  // @IsOptional()
-  // @IsDate()
-  // horaSalida:  Date = new Date().toUTCString();
-
   @IsOptional()
   @IsDate()
-  fechaHoraSalida: Date = new Date();
+  fechaHoraSalida: Date;
 
-  // @IsNotEmpty()
-  // @IsDate()
-  // horaLlegada: Date;
+  @IsNotEmpty({ message: 'Debe ingresar un empleado válido' })
+  @IsMongoId({ message: 'Debe ingresar un empleado válido' })
+  empleado1: string;
 
-  @IsOptional()
-  @IsDate()
-  fechaHoraLlegada: Date;
-
-  @IsOptional()
-  @IsBoolean()
-  estado: boolean;
-
-  @IsNotEmpty()
-  @IsMongoId()
-  usuChoferId: string;
+  @IsNotEmpty({ message: 'Debe ingresar un tipo de empleado válido' })
+  @IsString({ message: 'Debe ingresar un tipo de empleado válido' })
+  tipoEmpleado1: string;
 
   @IsOptional()
-  @IsMongoId()
-  usuAyudanteId: string;
+  @IsMongoId({ message: 'Debe ingresar un empleado válido' })
+  empleado2: string;
 
-  @IsNotEmpty()
-  @IsMongoId()
+  @IsOptional()
+  @IsString({ message: 'Debe ingresar un tipo de empleado válido' })
+  tipoEmpleado2: string;
+
+  @IsNotEmpty({ message: 'Debe ingresar un bus válido' })
+  @IsMongoId({ message: 'Debe ingresar un bus válido' })
   bus: string;
 
-  @IsNotEmpty()
-  @IsMongoId()
+  @IsNotEmpty({ message: 'Debe ingresar una ruta válida' })
+  @IsMongoId({ message: 'Debe ingresar una ruta válida' })
   ruta: string;
 }
 
@@ -56,8 +48,12 @@ export class FiltroViajeDto {
   id: string;
 }
 
-export class AgregarAyudanteViajeDto {
-  @IsNotEmpty()
-  @IsMongoId()
-  usuAyudanteId: string;
+export class AgregarEmpleado2Dto {
+  @IsNotEmpty({ message: 'Debe ingresar un empleado válido' })
+  @IsMongoId({ message: 'Debe ingresar un empleado válido' })
+  empleado2: string;
+
+  @IsOptional({ message: 'Debe ingresar un tipo de empleado válido' })
+  @IsString({ message: 'Debe ingresar un tipo de empleado válido' })
+  tipoEmpleado2: string;
 }

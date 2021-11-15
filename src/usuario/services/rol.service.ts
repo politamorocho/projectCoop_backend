@@ -41,6 +41,9 @@ export class RolService {
     return await this.rolModel.find().exec();
   }
 
+  async soloActivos() {
+    return await this.rolModel.find({ estado: true }).exec();
+  }
   //filtra roles por activos=1 o inactivos=0 enviado por query
   async filtroActivoInactivo(query: FiltroRolDto) {
     let data;
@@ -62,7 +65,7 @@ export class RolService {
     const { id } = query;
     const data = await this.rolModel.findOne({ _id: id }).exec();
     if (!data) {
-      throw new NotFoundException(`No existe rol con id: ${id}`);
+      throw new NotFoundException(`No existe el rol`);
     }
     return data;
   }
@@ -86,15 +89,11 @@ export class RolService {
     const existeId = await this.rolModel.findOne({ _id: id });
 
     if (!existeId) {
-      throw new NotFoundException(
-        `No se puede actualizar porque no existe rol con id: ${id}`,
-      );
+      throw new NotFoundException(`No se puede actualizar el rol`);
     }
 
     if (!existeId.estado) {
-      throw new BadRequestException(
-        `no se puede actualizar el rol porque es inactivo`,
-      );
+      throw new BadRequestException(`No se puede actualizar el rol`);
     }
 
     const data = await this.rolModel.findByIdAndUpdate(
@@ -112,13 +111,13 @@ export class RolService {
 
     if (!existeId) {
       throw new NotFoundException(
-        `No se puede eliminar porque no existe rol con id: ${id}`,
+        `No se puede eliminar porque no existe el rol`,
       );
     }
 
     if (!existeId.estado) {
       throw new BadRequestException(
-        `no se puede eliminar el rol  porque es inactivo`,
+        `No se puede eliminar porque no existe el rol`,
       );
     }
     const data = await this.rolModel.findByIdAndUpdate(
@@ -180,6 +179,16 @@ export class RolService {
     if (!data) {
       return false;
     }
+    return data;
+  }
+
+  async esRolEmpleado2() {
+    const emp = process.env.ROL_VIAJE;
+    const data = await this.rolModel.findOne({ nombre: emp });
+    if (!data) {
+      return false;
+    }
+
     return data;
   }
 }

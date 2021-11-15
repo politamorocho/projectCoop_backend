@@ -8,9 +8,11 @@ import {
   Query,
   Body,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { RutaService } from '../services/ruta.service';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import {
   CrearRutaDto,
   ActualizarRutaDto,
@@ -18,6 +20,7 @@ import {
   IdRutaDto,
 } from '../dtos/ruta.dto';
 
+//@UseGuards(JwtAuthGuard)
 @Controller('ruta')
 export class RutaController {
   constructor(private rutaService: RutaService) {}
@@ -40,6 +43,17 @@ export class RutaController {
     if (data) {
       response.status(HttpStatus.OK).json({
         msg: 'Lista  de  rutas',
+        data,
+      });
+    }
+  }
+
+  @Get('/activos')
+  async soloActivos(@Res() response: Response) {
+    const data = await this.rutaService.soloActivos();
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Lista  de rutas activas',
         data,
       });
     }

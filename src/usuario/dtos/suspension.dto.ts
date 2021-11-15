@@ -15,33 +15,29 @@ import {
 
 export class CrearSuspensionDto {
   @IsDate()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Debe ingresar una fecha válida' })
   inicio: Date;
 
   @IsDate()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Debe ingresar una fecha válida' })
   final: Date;
 
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: 'Debe ingresar una descripción válida' })
+  @IsNotEmpty({ message: 'Debe ingresar una descripción válida' })
   descripcion: string;
 
   @IsOptional()
   @IsBoolean()
   estado: boolean;
 
-  @IsMongoId()
-  @IsNotEmpty()
+  @IsMongoId({ message: 'Debe ingresar un usuario válido' })
+  @IsNotEmpty({ message: 'Debe ingresar un usuario válido' })
   usuario: string;
 }
 
 export class ActualizarSuspensionDto extends PartialType(CrearSuspensionDto) {}
 
-export class FiltroSuspensionDto {
-  @IsOptional()
-  @IsInt()
-  estado: number;
-
+export class FiltroFechaDto {
   @IsOptional()
   @IsDate()
   desde: Date;

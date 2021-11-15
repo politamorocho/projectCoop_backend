@@ -9,6 +9,7 @@ import {
   Put,
   Delete,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import {
@@ -19,7 +20,9 @@ import {
 } from '../dtos/rol.dto';
 
 import { RolService } from '../services/rol.service';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
+//@UseGuards(JwtAuthGuard)
 @Controller('rol')
 export class RolController {
   constructor(private rolService: RolService) {}
@@ -31,6 +34,18 @@ export class RolController {
     if (data) {
       response.status(HttpStatus.OK).json({
         msg: 'Lista  del roles',
+        data,
+      });
+    }
+  }
+
+  //solo roles activos
+  @Get('/activos')
+  async soloActivos(@Res() response: Response) {
+    const data = await this.rolService.soloActivos();
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Lista  del roles activos',
         data,
       });
     }

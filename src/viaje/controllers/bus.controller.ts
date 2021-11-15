@@ -10,6 +10,7 @@ import {
   Query,
   Delete,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
@@ -19,7 +20,9 @@ import {
   IdBusDto,
 } from '../dtos/bus.dto';
 import { BusService } from '../services/bus.service';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
+//@UseGuards(JwtAuthGuard)
 @Controller('bus')
 export class BusController {
   constructor(private busService: BusService) {}
@@ -42,6 +45,17 @@ export class BusController {
     if (data) {
       response.status(HttpStatus.OK).json({
         msg: 'Lista  del buses',
+        data,
+      });
+    }
+  }
+
+  @Get('/activos')
+  async soloActivos(@Res() response: Response) {
+    const data = await this.busService.soloActivos();
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Lista  de buses activos',
         data,
       });
     }

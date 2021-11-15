@@ -18,7 +18,7 @@ import {
   ActualizarUsuarioDto,
   CrearUsuarioDto,
   FiltroUsuarioDto,
-  IdUsuarioDto,
+  IdDto,
   CambiarClaveDto,
   RecuperarClaveDto,
   FijarNuevaClaveDto,
@@ -42,8 +42,27 @@ export class UsuarioService {
     return data;
   }
 
+  //mostrar solo activos
+  async soloActivos() {
+    let data = await this.usuarioModel.find({ estado: true }).exec();
+    return data;
+  }
+
+  //mostrar empleados activos
+  async empleadoActivo() {
+    const idRol = await this.rolService.esRolEmpleado2();
+
+    if (!idRol) {
+      throw new BadRequestException('No hay empleados activos');
+    }
+
+    let data = await this.usuarioModel
+      .find({ rol: idRol._id, estado: true })
+      .exec();
+    return data;
+  }
   //muestra la info de un usuario activo enviado por el query
-  async mostrarUno(idUs: IdUsuarioDto) {
+  async mostrarUno(idUs: IdDto) {
     const { id } = idUs;
     const data = await this.usuarioModel
       .findOne({ _id: id })
@@ -146,7 +165,7 @@ export class UsuarioService {
     //pregunta si es un rol activo
     const rolActivo = await this.rolService.verificaRolActivo(usuario.rol);
     if (!rolActivo) {
-      throw new BadRequestException(`El rol asignado no es un rol activo`);
+      throw new BadRequestException(`El rol asignado no está activo`);
     }
 
     //si no existe el correo y existe el rol, entonces crea el usuario
@@ -162,7 +181,7 @@ export class UsuarioService {
     return data;
   }
 
-  async actualizar(idUs: IdUsuarioDto, cambios: ActualizarUsuarioDto) {
+  async actualizar(idUs: IdDto, cambios: ActualizarUsuarioDto) {
     const { id } = idUs;
     const existeId = await this.usuarioModel.findOne({ _id: id });
 
@@ -177,7 +196,7 @@ export class UsuarioService {
 
     //pregunta el estado del usuario que llega, si es false sale.
     if (!existeId.estado) {
-      throw new BadRequestException(`no es un usuario activo`);
+      throw new BadRequestException(`El usuario elegido no está activo`);
     }
 
     // verifica si existe el correo, si es el mismo no hace nada
@@ -190,7 +209,7 @@ export class UsuarioService {
 
         if (correoExiste) {
           throw new BadRequestException(
-            `el correo ${correoExiste.correo} ya existe`,
+            `El correo ${correoExiste.correo} ya existe`,
           );
         }
       }
@@ -214,19 +233,19 @@ export class UsuarioService {
     //verifica el id de rol que sea valido
     if (cambios.rol) {
       if (!isMongoId(cambios.rol)) {
-        throw new BadRequestException(`el rol no es un id de mongo valido`);
+        throw new BadRequestException(`Rl rol no es válido`);
       }
 
       //si es un mongoid valido, verifica que exista
       const rolId = await this.rolService.verificaRolId(cambios.rol);
       if (!rolId) {
-        throw new NotFoundException(`el rol no existe`);
+        throw new NotFoundException(`El rol no existe`);
       }
 
       //pregunta si es un rol activo
       const rolActivo = await this.rolService.verificaRolActivo(cambios.rol);
       if (!rolActivo) {
-        throw new BadRequestException(`el rol no es un rol activo`);
+        throw new BadRequestException(`El rol no está activo`);
       }
 
       data.rol = mongoose.Types.ObjectId(cambios.rol);
@@ -241,7 +260,7 @@ export class UsuarioService {
   }
 
   //para actualizar la clave
-  async verificarClave(idUs: IdUsuarioDto, cambios: CambiarClaveDto) {
+  async verificarClave(idUs: IdDto, cambios: CambiarClaveDto) {
     const { id } = idUs;
     const { claveAnterior, claveNueva } = cambios;
 
@@ -256,7 +275,7 @@ export class UsuarioService {
     );
 
     if (!siCoincide) {
-      throw new BadRequestException('Los datos introducidos no coinciden');
+      throw new BadRequestException('Los claves introducidos no coinciden');
     }
 
     const salt = await bcryptjs.genSaltSync(10);
@@ -271,15 +290,15 @@ export class UsuarioService {
   }
 
   //eliminar un usuario
-  async eliminar(idUs: IdUsuarioDto) {
+  async eliminar(idUs: IdDto) {
     const { id } = idUs;
     const existeId = await this.usuarioModel.findOne({ _id: id });
 
     if (!existeId) {
-      throw new NotFoundException(`el usuario no existe`);
+      throw new NotFoundException(`El usuario no existe`);
     }
     if (!existeId.estado) {
-      throw new BadRequestException(`El usuario no esta activo`);
+      throw new BadRequestException(`El usuario no está activo`);
     }
 
     const data = await this.usuarioModel.findByIdAndUpdate(
@@ -297,7 +316,7 @@ export class UsuarioService {
     const siCorreo = await this.usuarioModel.findOne({ correo: correo });
 
     if (!siCorreo) {
-      throw new NotFoundException('No existe el correo en db');
+      throw new NotFoundException(`El correo ${correo} no está registrado`);
     }
     const nombre = siCorreo.nombre;
     const corr = siCorreo.correo;
@@ -359,12 +378,12 @@ export class UsuarioService {
       codigoRecuperacion: codigo,
     });
     if (!codigoExiste) {
-      throw new NotFoundException('No coincide el codigo');
+      throw new NotFoundException('El código ingresado no coincide ');
     }
 
     const aTiempo = await this.verificarCaducidadCodigo(codigo);
     if (!aTiempo) {
-      throw new BadRequestException('El codigo ha caducado');
+      throw new BadRequestException('El código ha caducado');
     }
 
     const salt = await bcryptjs.genSaltSync(10);
@@ -410,7 +429,7 @@ export class UsuarioService {
     return true;
   }
 
-  async existeIdPorDto(idUs: IdUsuarioDto) {
+  async existeIdPorDto(idUs: IdDto) {
     const { id } = idUs;
     const data = await this.usuarioModel.findById({ _id: id });
 

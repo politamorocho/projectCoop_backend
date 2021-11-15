@@ -14,7 +14,7 @@ import {
   CrearViajeDto,
   ActualizarViajeDto,
   FiltroViajeDto,
-  AgregarAyudanteViajeDto,
+  AgregarEmpleado2Dto,
 } from '../dtos/viaje.dto';
 import { ViajeService } from '../services/viaje.service';
 
@@ -34,44 +34,16 @@ export class ViajeController {
   }
 
   @Put('/agrAyudante')
-  async agregarAyudante(
-    @Body() idAyudante: AgregarAyudanteViajeDto,
+  async agregarEmpleado2(
+    @Body() idAyudante: AgregarEmpleado2Dto,
     @Query() idViaje: FiltroViajeDto,
     @Res() response: Response,
   ) {
-    const data = await this.viajeService.agregarAyudante(idViaje, idAyudante);
+    const data = await this.viajeService.agregarEmpleado2(idViaje, idAyudante);
     if (data) {
       response.status(HttpStatus.OK).json({
         msg: 'Ayudante agregado, viaje actualizado',
         data: data,
-      });
-    }
-  }
-
-  @Get()
-  async listar(@Res() response: Response) {
-    const data = await this.viajeService.listarTodo();
-
-    if (data) {
-      response.status(HttpStatus.OK).json({
-        msg: 'Lista  de  viajes',
-        data,
-      });
-    }
-  }
-
-  @Get('/viajeUsuario')
-  async buscar(@Res() response: Response, @Query() id: FiltroViajeDto) {
-    const data = await this.viajeService.viajePorUsuario(id);
-
-    if (data) {
-      response.status(HttpStatus.OK).json({
-        msg: 'Lista  de  viajes del usuario',
-        data,
-      });
-    } else {
-      response.status(HttpStatus.BAD_REQUEST).json({
-        msg: 'no rutas',
       });
     }
   }
@@ -92,14 +64,15 @@ export class ViajeController {
     }
   }
 
-  @Delete()
-  async eliminar(@Query() id: FiltroViajeDto, @Res() response: Response) {
-    const data = await this.viajeService.eliminar(id);
+  // @Delete()
+  // async eliminar(@Query() id: FiltroViajeDto, @Res() response: Response) {
+  //   const data = await this.viajeService.eliminar(id);
 
-    if (data) {
-      response.status(HttpStatus.OK).json({
-        msg: 'Viaje eliminado con existo',
-      });
-    }
-  }
+  //   if (data) {
+  //     response.status(HttpStatus.OK).json({
+  //       msg: 'Viaje eliminado con éxito',
+  //       data,
+  //     });
+  //   }
+  // }
 }

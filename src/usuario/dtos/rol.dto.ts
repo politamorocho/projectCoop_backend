@@ -11,11 +11,11 @@ import {
 } from 'class-validator';
 
 export class CrearRolDto {
-  @IsNotEmpty()
-  @IsString()
+  @IsNotEmpty({ message: 'Debe ingresar un nombre válido' })
+  @IsString({ message: 'Debe ingresar un nombre válido' })
   nombre: string;
 
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Debe ingresar una descripción válida' })
   @IsString()
   descripcion: string;
 

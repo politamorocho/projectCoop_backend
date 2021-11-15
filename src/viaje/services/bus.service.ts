@@ -33,7 +33,7 @@ export class BusService {
     });
     if (numDisco) {
       throw new BadRequestException(
-        `El bus con numero de Disco: ${bus.numeroDisco} ya existe`,
+        `El bus con numero de disco: ${bus.numeroDisco} ya existe`,
       );
     }
 
@@ -50,11 +50,17 @@ export class BusService {
     return data;
   }
 
+  //mostrar solo activos
+  async soloActivos() {
+    let data = await this.busModel.find({ estado: true }).exec();
+    return data;
+  }
+
   //mostrar la info de un bus enviado el id por query
   async mostrarUno(idBus: IdBusDto) {
     const { id } = idBus;
     if (!(await this.busModel.findById(id))) {
-      throw new NotFoundException('no existe ese id');
+      throw new NotFoundException('No existe el bus');
     }
 
     const data = await this.busModel.findOne({ _id: id });
@@ -108,13 +114,30 @@ export class BusService {
 
     if (!existeId) {
       throw new NotFoundException(
-        `No se puede actualizar porque no existe bus con id: ${id}`,
+        `No se puede actualizar porque no existe el bus`,
       );
     }
 
     if (!existeId.estado) {
       throw new BadRequestException(
-        `no se puede actualizar el bus  ${existeId.placa} porque es inactivo`,
+        `No se puede actualizar porque no existe el bus`,
+      );
+    }
+
+    const existePlaca = await this.busModel.findOne({ placa: busAct.placa });
+
+    if (existePlaca) {
+      throw new BadRequestException(
+        `El bus con placa: ${busAct.placa} ya existe`,
+      );
+    }
+
+    const numDisco = await this.busModel.findOne({
+      numeroDisco: busAct.numeroDisco,
+    });
+    if (numDisco) {
+      throw new BadRequestException(
+        `El bus con numero de disco: ${busAct.numeroDisco} ya existe`,
       );
     }
 
@@ -135,7 +158,7 @@ export class BusService {
       throw new NotFoundException(`el bus no existe`);
     }
     if (!existeId.estado) {
-      throw new BadRequestException(`El bus no esta activo`);
+      throw new BadRequestException(`El bus no está activo`);
     }
 
     const data = await this.busModel.findByIdAndUpdate(

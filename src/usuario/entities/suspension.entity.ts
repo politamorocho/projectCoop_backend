@@ -14,9 +14,6 @@ export class Suspension extends Document {
   @Prop({ required: true })
   descripcion: string;
 
-  @Prop({ default: true })
-  estado: boolean;
-
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: Usuario.name,

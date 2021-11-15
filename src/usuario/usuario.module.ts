@@ -9,6 +9,8 @@ import { Suspension, SuspensionSchema } from './entities/suspension.entity';
 import { UsuarioService } from './services/usuario.service';
 import { RolService } from './services/rol.service';
 import { SuspensionService } from './services/suspension.service';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [

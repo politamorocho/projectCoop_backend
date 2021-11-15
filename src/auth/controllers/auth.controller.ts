@@ -4,33 +4,32 @@ import {
   Req,
   Post,
   Body,
+  Request,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Request } from 'express';
+
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '../services/auth.service';
 import { Usuario } from 'src/usuario/entities/usuario.entity';
-import { LoginDto } from '../dtos/login.dto';
+import { LocalAuthGuard } from '../guards/local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  //@UseGuards(AuthGuard('local'))
-  @Post('login')
-  async login(@Body() login: LoginDto) {
-    console.log(login, 'logins');
-    const { cedula, clave } = login;
-    const usuario = await this.authService.validarUsuario(cedula, clave);
-    if (!usuario) {
-      return new UnauthorizedException('no señor');
-    }
+  @UseGuards(LocalAuthGuard)
+  @Post('/login')
+  async login(@Request() req) {
+    const user = req.user as Usuario;
 
-    return this.authService.generarJWT(usuario);
+    return this.authService.generarJWT(user);
   }
-  //  login(@Req() req: Request) {
-  //   const user = req.user as Usuario;
-  //   console.log(user);
-  //   return this.authService.generarJWT(user);
+
+  // async login(@Req() login: Request) {
+  //   console.log(login, 'logins');
+
+  //   const usuario = await this.authService.validarUsuario(cedula, clave);
+
+  //   return this.authService.generarJWT(usuario);
   // }
 }

@@ -10,16 +10,21 @@ import {
 } from 'class-validator';
 
 export class CrearRutaDto {
-  @IsNotEmpty()
-  @IsString()
+  @IsNotEmpty({ message: 'Debe ingresar lugar de origen para la ruta válido' })
+  @IsString({ message: 'Debe ingresar lugar de origen para la ruta válido' })
   origen: string;
 
-  @IsNotEmpty()
-  @IsString()
+  @IsNotEmpty({ message: 'Debe ingresar lugar de destino para la ruta válido' })
+  @IsString({ message: 'Debe ingresar lugar de destino para la ruta válido' })
   destino: string;
 
   @IsOptional()
   estado: boolean;
+
+  @IsNotEmpty({
+    message: 'Debe ingresar una duración aproximada para la ruta válida',
+  })
+  duracionAprox: string;
 }
 
 export class ActualizarRutaDto extends PartialType(CrearRutaDto) {}
@@ -27,7 +32,6 @@ export class ActualizarRutaDto extends PartialType(CrearRutaDto) {}
 export class FiltroRutaDto {
   @IsOptional()
   lugar: string;
-
 
   @IsOptional()
   @IsInt()
