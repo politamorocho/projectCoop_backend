@@ -5,14 +5,17 @@ import {
   Body,
   Delete,
   Put,
+  Request,
   Param,
   Query,
   Res,
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { Response, Request } from 'express';
+import { Response } from 'express';
+
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { SecGuard } from 'src/auth/guards/secretaria.guard';
 
 import {
   CrearUsuarioDto,
@@ -23,12 +26,23 @@ import {
   RecuperarClaveDto,
   FijarNuevaClaveDto,
 } from '../dtos/usuario.dto';
+import { RolService } from '../services/rol.service';
 import { UsuarioService } from '../services/usuario.service';
 
-//@UseGuards(JwtAuthGuard)
+import { PayloadToken } from './../../auth/models/token.model';
+import { Rol } from '../entities/rol.entity';
+
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+
+//@UseGuards(JwtAuthGuard, SecGuard)
 @Controller('usuario')
 export class UsuarioController {
-  constructor(private usuarioService: UsuarioService) {}
+  constructor(
+    @InjectModel(Rol.name) private rolModel: Model<Rol>,
+    private usuarioService: UsuarioService,
+    private rolService: RolService,
+  ) {}
 
   //info de todos los usuarios activos e inactivos
   @Get()
@@ -55,8 +69,11 @@ export class UsuarioController {
   }
 
   //empleados activos
+
   @Get('/empActivo')
   async empleadoActivo(@Res() response: Response) {
+    // const user = req.user as PayloadToken;
+    // console.log('Es el user', user);
     const data = await this.usuarioService.empleadoActivo();
     if (data) {
       response.status(HttpStatus.OK).json({

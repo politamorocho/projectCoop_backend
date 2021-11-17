@@ -24,11 +24,11 @@ export class CrearViajeDto {
   tipoEmpleado1: string;
 
   @IsOptional()
-  @IsMongoId({ message: 'Debe ingresar un empleado válido' })
+  //@IsMongoId({ message: 'Debe ingresar un empleado válido' })
   empleado2: string;
 
   @IsOptional()
-  @IsString({ message: 'Debe ingresar un tipo de empleado válido' })
+  //@IsString({ message: 'Debe ingresar un tipo de empleado válido' })
   tipoEmpleado2: string;
 
   @IsNotEmpty({ message: 'Debe ingresar un bus válido' })

@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { SecGuard } from 'src/auth/guards/secretaria.guard';
 
 import {
   CrearSuspensionDto,
@@ -21,7 +22,7 @@ import {
 import { IdDto } from '../dtos/usuario.dto';
 import { SuspensionService } from '../services/suspension.service';
 
-//@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard, SecGuard)
 @Controller('suspension')
 export class SuspensionController {
   constructor(private suspenService: SuspensionService) {}

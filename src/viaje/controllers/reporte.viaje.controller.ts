@@ -11,9 +11,11 @@ import { Response } from 'express';
 import { FiltroViajeDto } from '../dtos/viaje.dto';
 import { ViajeService } from '../services/viaje.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { SecGuard } from 'src/auth/guards/secretaria.guard';
+import { AdmGuard } from 'src/auth/guards/admin.guard';
 import { FiltroFechaDto } from '../../usuario/dtos/suspension.dto';
 
-//@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard, SecGuard, AdmGuard)
 @Controller('reporte')
 export class ReporteViajeController {
   constructor(private viajeService: ViajeService) {}

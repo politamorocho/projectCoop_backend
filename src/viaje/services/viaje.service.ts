@@ -148,6 +148,17 @@ export class ViajeService {
     return this.viajeModel.find().exec();
   }
 
+  async listarUno(idVi: FiltroViajeDto) {
+    const { id } = idVi;
+    const existe = await this.viajeModel.findById({ _id: id });
+
+    if (!existe) {
+      throw new NotFoundException('No existe el viaje');
+    }
+
+    return existe;
+  }
+
   //listar viajes activos
   // async viajesActivo() {
   //   return this.viajeModel.find({ estado: true }).exec();

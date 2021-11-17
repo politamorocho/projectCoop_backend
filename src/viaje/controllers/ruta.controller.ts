@@ -13,6 +13,7 @@ import {
 import { Response } from 'express';
 import { RutaService } from '../services/ruta.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { SecGuard } from 'src/auth/guards/secretaria.guard';
 import {
   CrearRutaDto,
   ActualizarRutaDto,
@@ -20,7 +21,7 @@ import {
   IdRutaDto,
 } from '../dtos/ruta.dto';
 
-//@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard, SecGuard)
 @Controller('ruta')
 export class RutaController {
   constructor(private rutaService: RutaService) {}

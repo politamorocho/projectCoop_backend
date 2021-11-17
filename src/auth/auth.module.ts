@@ -9,6 +9,8 @@ import { AuthService } from './services/auth.service';
 import { UsuarioModule } from '../usuario/usuario.module';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { SecGuard } from './guards/secretaria.guard';
+import { AdmGuard } from './guards/admin.guard';
 
 @Global()
 @Module({
@@ -26,6 +28,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, SecGuard, AdmGuard],
 })
 export class AuthModule {}

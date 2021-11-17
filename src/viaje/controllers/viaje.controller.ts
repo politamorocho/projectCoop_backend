@@ -48,6 +48,17 @@ export class ViajeController {
     }
   }
 
+  @Get('/p')
+  async mostraUno(@Query() idViaje: FiltroViajeDto, @Res() response: Response) {
+    const data = await this.viajeService.listarUno(idViaje);
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Informacion del viaje',
+        data: data,
+      });
+    }
+  }
+
   @Put()
   async actualizar(
     @Query() id: FiltroViajeDto,

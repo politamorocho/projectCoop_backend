@@ -122,6 +122,16 @@ export class RutaService {
       );
     }
 
+    const existeYa = await this.rutaModel.findOne({
+      origen: rutaAct.origen,
+      destino: rutaAct.destino,
+    });
+    if (existeYa) {
+      throw new BadRequestException(
+        `La ruta con origen: ${rutaAct.origen} y destino: ${rutaAct.destino} ya existe`,
+      );
+    }
+
     const data = await this.rutaModel.findByIdAndUpdate(
       id,
       { $set: rutaAct },

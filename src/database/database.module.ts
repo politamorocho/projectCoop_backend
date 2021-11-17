@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { MongoClient } from 'mongodb';
 
 import config from 'src/config';
 
@@ -27,7 +28,18 @@ import config from 'src/config';
       inject: [config.KEY],
     }),
   ],
-
+  // providers: [{
+  //   provide: 'MONGO',
+  //   useFactory: async (configService: ConfigType<typeof config>) => {
+  //     const { connection, host, port, dbName } = configService.mongo;
+  //     const uri = `${connection}://${host}:${port}/?readPreference=primary`;
+  //     const client = new MongoClient(uri);
+  //     await client.connect();
+  //     const database = client.db(dbName);
+  //     return database;
+  //   },
+  //   inject: [config.KEY],
+  // },],
   exports: [MongooseModule],
 })
 export class DatabaseModule {}

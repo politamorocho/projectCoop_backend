@@ -176,9 +176,9 @@ export class RolService {
   async esRolAdministrador() {
     const adm = process.env.ROL_CORREO_1;
     const data = await this.rolModel.findOne({ nombre: adm });
-    if (!data) {
-      return false;
-    }
+    // if (!data) {
+    //   return false;
+    // }
     return data;
   }
 

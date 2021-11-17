@@ -124,21 +124,30 @@ export class BusService {
       );
     }
 
-    const existePlaca = await this.busModel.findOne({ placa: busAct.placa });
-
-    if (existePlaca) {
-      throw new BadRequestException(
-        `El bus con placa: ${busAct.placa} ya existe`,
-      );
+    if (busAct.placa) {
+      if (busAct.placa !== existeId.placa) {
+        const existePlaca = await this.busModel.findOne({
+          placa: busAct.placa,
+        });
+        if (existePlaca) {
+          throw new BadRequestException(
+            `El bus con placa: ${busAct.placa} ya existe`,
+          );
+        }
+      }
     }
 
-    const numDisco = await this.busModel.findOne({
-      numeroDisco: busAct.numeroDisco,
-    });
-    if (numDisco) {
-      throw new BadRequestException(
-        `El bus con numero de disco: ${busAct.numeroDisco} ya existe`,
-      );
+    if (busAct.numeroDisco) {
+      if (busAct.numeroDisco !== existeId.numeroDisco) {
+        const numDisco = await this.busModel.findOne({
+          numeroDisco: busAct.numeroDisco,
+        });
+        if (numDisco) {
+          throw new BadRequestException(
+            `El bus con numero de disco: ${busAct.numeroDisco} ya existe`,
+          );
+        }
+      }
     }
 
     const data = await this.busModel.findByIdAndUpdate(

@@ -21,8 +21,9 @@ import {
 
 import { RolService } from '../services/rol.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { SecGuard } from 'src/auth/guards/secretaria.guard';
 
-//@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard, SecGuard)
 @Controller('rol')
 export class RolController {
   constructor(private rolService: RolService) {}
