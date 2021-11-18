@@ -322,31 +322,40 @@ export class ViajeService {
       const secretaria = await this.usuarioService.esSecretaria();
       const administrador = await this.usuarioService.esAdministrador();
 
+      const feInicio = moment(susActiva.inicio).format('DD-MM-YYYY');
+      const feFinal = moment(susActiva.final).format('DD-MM-YYYY');
+      const feformat = moment(fecha).format('DD-MM-YYYY');
+      const horaFormat = moment(fecha).format('HH:mm');
+
       if (secretaria) {
         const correo = secretaria.correo;
         const nomSec = secretaria.nombre;
-        const empNombre = nomEmp;
-        const empApellido = apeEmp;
 
         const enviar = this.emailService.enviarCorreo(
           correo,
           nomSec,
-          empNombre,
-          empApellido,
+          nomEmp,
+          apeEmp,
+          feInicio,
+          feFinal,
+          feformat,
+          horaFormat,
         );
       }
 
       if (administrador) {
         const correo = administrador.correo;
         const nomAdm = administrador.nombre;
-        const empNombre = nomEmp;
-        const empApellido = apeEmp;
 
         const enviar = this.emailService.enviarCorreo(
           correo,
           nomAdm,
-          empNombre,
-          empApellido,
+          nomEmp,
+          apeEmp,
+          feInicio,
+          feFinal,
+          feformat,
+          horaFormat,
         );
       }
       return susActiva;

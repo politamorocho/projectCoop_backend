@@ -57,7 +57,7 @@ export class UsuarioController {
     }
   }
 
-  @Get('/activos')
+  @Get('/a')
   async soloActivos(@Res() response: Response) {
     const data = await this.usuarioService.soloActivos();
     if (data) {
@@ -70,7 +70,7 @@ export class UsuarioController {
 
   //empleados activos
 
-  @Get('/empActivo')
+  @Get('/ea')
   async empleadoActivo(@Res() response: Response) {
     // const user = req.user as PayloadToken;
     // console.log('Es el user', user);
@@ -101,7 +101,7 @@ export class UsuarioController {
 
   //busca usuarios por coincidencias de nombres o apellidos o cedula
   //enviados por query
-  @Get('/buscar')
+  @Get('/b')
   async busqueda(@Query() params: FiltroUsuarioDto, @Res() response: Response) {
     const data = await this.usuarioService.busqueda(params);
 
@@ -114,7 +114,7 @@ export class UsuarioController {
   }
 
   //filtra usuarios por activos=1 o inactivos=0 enviado por query
-  @Get('/filtro')
+  @Get('/f')
   async filtrar(@Query() params: FiltroUsuarioDto, @Res() response: Response) {
     const data = await this.usuarioService.filtroActivoInactivo(params);
 
@@ -165,7 +165,7 @@ export class UsuarioController {
     }
   }
 
-  @Put('/actClave')
+  @Put('/ac')
   async actualizarClave(
     @Query() idUs: IdDto,
     @Body() cambios: CambiarClaveDto,
@@ -180,7 +180,7 @@ export class UsuarioController {
   }
 
   //envia el codigo de verifiacion de segurirdad para fijar nueva clave
-  @Post('/enviarCodigo')
+  @Post('/ec')
   async enviarCodigoRecuperacion(
     @Body() correo: RecuperarClaveDto,
     @Res() response: Response,
@@ -194,7 +194,7 @@ export class UsuarioController {
   }
 
   //con el codigo enviado se fija una nueva clave
-  @Put('/nuevaClave')
+  @Put('/nc')
   async asignarNuevaClave(
     @Body() info: FijarNuevaClaveDto,
     @Res() response: Response,

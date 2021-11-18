@@ -41,7 +41,7 @@ export class RolController {
   }
 
   //solo roles activos
-  @Get('/activos')
+  @Get('/a')
   async soloActivos(@Res() response: Response) {
     const data = await this.rolService.soloActivos();
     if (data) {
@@ -53,7 +53,7 @@ export class RolController {
   }
 
   //filtra roles por activos=1 o inactivos=0 enviado por query
-  @Get('/filtro')
+  @Get('/f')
   async filtroActivoInactivo(
     @Query() query: FiltroRolDto,
     @Res() response: Response,
@@ -81,7 +81,7 @@ export class RolController {
   }
 
   //buscar roles por nombre
-  @Get('/buscar')
+  @Get('/b')
   async buscar(@Query() buscar: FiltroRolDto, @Res() response: Response) {
     const data = await this.rolService.buscar(buscar);
     if (data) {

@@ -69,7 +69,7 @@ export class SuspensionController {
   }
 
   //todas las suspensiones del usuario por id enviado por query
-  @Get('/usuario')
+  @Get('/u')
   async susPorUsuario(@Query() id: IdDto, @Res() response: Response) {
     const data = await this.suspenService.susPorUsuario(id);
 
@@ -85,7 +85,7 @@ export class SuspensionController {
     }
   }
 
-  @Get('/limite')
+  @Get('/l')
   async suspensionesPorRango(
     @Body() rango: FiltroFechaDto,
     @Res() response: Response,
@@ -101,7 +101,7 @@ export class SuspensionController {
   }
 
   //Muestra las suspensiones de un usuario por id, en rango  por fecha de creacioon
-  @Get('/usFecha')
+  @Get('/uf')
   async susPorUsuarioFecha(
     @Query() id: IdDto,
     @Body() params: FiltroFechaDto,

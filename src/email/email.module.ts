@@ -24,7 +24,7 @@ import config from 'src/config';
           },
 
           defaults: {
-            from: efrom,
+            from: `${efrom}`,
           },
           preview: true,
           template: {

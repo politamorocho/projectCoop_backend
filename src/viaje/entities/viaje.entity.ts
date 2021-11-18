@@ -56,7 +56,7 @@ export class Viaje extends Document {
     require: true,
     type: mongoose.Schema.Types.ObjectId,
     ref: Ruta.name,
-    autopopulate: { select: '_id origen destino estado' },
+    autopopulate: { select: '_id origen destino estado duracionAprox' },
   })
   ruta: Ruta | Types.ObjectId;
 

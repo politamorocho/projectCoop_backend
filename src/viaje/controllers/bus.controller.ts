@@ -51,7 +51,7 @@ export class BusController {
     }
   }
 
-  @Get('/activos')
+  @Get('/a')
   async soloActivos(@Res() response: Response) {
     const data = await this.busService.soloActivos();
     if (data) {
@@ -74,7 +74,7 @@ export class BusController {
     }
   }
 
-  @Get('/filtro')
+  @Get('/f')
   async listar(@Res() response: Response, @Query() params: FiltroBusDto) {
     const data = await this.busService.listar(params);
 
@@ -86,7 +86,7 @@ export class BusController {
     }
   }
 
-  @Get('/buscar')
+  @Get('/b')
   async buscar(@Res() response: Response, @Query() params: FiltroBusDto) {
     const data = await this.busService.buscarPorPlacaONumero(params);
 

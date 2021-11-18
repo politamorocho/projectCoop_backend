@@ -49,7 +49,7 @@ export class RutaController {
     }
   }
 
-  @Get('/activos')
+  @Get('/a')
   async soloActivos(@Res() response: Response) {
     const data = await this.rutaService.soloActivos();
     if (data) {
@@ -72,7 +72,7 @@ export class RutaController {
     }
   }
 
-  @Get('/filtro')
+  @Get('/f')
   async filtrarActivaInactiva(
     @Res() response: Response,
     @Query() params: FiltroRutaDto,
@@ -87,7 +87,7 @@ export class RutaController {
     }
   }
 
-  @Get('/buscar')
+  @Get('/b')
   async buscar(@Res() response: Response, @Query() params: FiltroRutaDto) {
     const data = await this.rutaService.buscarPorOrigenODestino(params);
 

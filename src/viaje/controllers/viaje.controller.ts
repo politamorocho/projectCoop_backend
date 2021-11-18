@@ -33,7 +33,7 @@ export class ViajeController {
     }
   }
 
-  @Put('/agrAyudante')
+  @Put('/ayu')
   async agregarEmpleado2(
     @Body() idAyudante: AgregarEmpleado2Dto,
     @Query() idViaje: FiltroViajeDto,

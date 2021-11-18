@@ -154,7 +154,7 @@ export class RolService {
     const nombre = data.nombre;
 
     // const emp: string = 'empleado';
-    const emp: string = process.env.ROL_VIAJE;
+    const emp: string = `${process.env.ROL_VIAJE}`;
     if (nombre.toLowerCase() !== emp.toLowerCase()) {
       throw new BadRequestException('El usuario no tiene el rol de empleado');
     }
@@ -164,7 +164,7 @@ export class RolService {
 
   async esRolSecretaria() {
     //var entorno
-    const sec = process.env.ROL_CORREO_2;
+    const sec = `${process.env.ROL_CORREO_2}`;
 
     const data = await this.rolModel.findOne({ nombre: sec });
     if (!data) {
@@ -174,7 +174,7 @@ export class RolService {
   }
 
   async esRolAdministrador() {
-    const adm = process.env.ROL_CORREO_1;
+    const adm = `${process.env.ROL_CORREO_1}`;
     const data = await this.rolModel.findOne({ nombre: adm });
     // if (!data) {
     //   return false;
@@ -183,7 +183,8 @@ export class RolService {
   }
 
   async esRolEmpleado2() {
-    const emp = process.env.ROL_VIAJE;
+    const emp = `${process.env.ROL_VIAJE}`;
+    console.log('emple', emp);
     const data = await this.rolModel.findOne({ nombre: emp });
     if (!data) {
       return false;

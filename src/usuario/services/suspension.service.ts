@@ -28,6 +28,13 @@ export class SuspensionService {
 
   //crea una suspension nueva
   async crearSuspension(suspension: CrearSuspensionDto) {
+    const ini = moment(suspension.inicio).format('YYYY-MM-DD');
+    const fin = moment(suspension.final).format('YYYY-MM-DD');
+
+    if (ini > fin || fin < ini) {
+      throw new BadRequestException('Revise las fechas, son inválidas');
+    }
+
     if (!(await this.usuarioService.existeUsuarioId(suspension.usuario))) {
       throw new NotFoundException('No existe el usuario');
     }
@@ -171,6 +178,25 @@ export class SuspensionService {
       );
     }
 
+    // const verificar = moment(fecha).format('YYYY-MM-DD HH:mm:ss');
+    const iniSusAct = moment(susActual.inicio).format('YYYY-MM-DD');
+    const finSusAct = moment(susActual.final).format('YYYY-MM-DD');
+    const iniExisteId = moment(existeId.inicio).format('YYYY-MM-DD');
+    const finExisteId = moment(existeId.final).format('YYYY-MM-DD');
+
+    if (susActual.inicio && susActual.final) {
+      if (susActual.inicio !== existeId.inicio) {
+        if (iniSusAct > finSusAct) {
+          throw new BadRequestException('Verifique las fechas por favor');
+        }
+        if (susActual.final !== existeId.final) {
+          if (finSusAct < iniSusAct) {
+            throw new BadRequestException('Verifique las fechas por favor');
+          }
+        }
+      }
+    }
+
     const data = await this.suspensionModel.findByIdAndUpdate(
       id,
       { $set: susActual },
@@ -183,14 +209,15 @@ export class SuspensionService {
   async suspensionActivaPorId(idUsuario: string, fecha: Date) {
     const existe = await this.suspensionModel.findOne({ usuario: idUsuario });
 
+    //console.log('estoooo ', existe);
     if (!existe) {
       return false;
     }
 
     const verificar = moment(fecha).format('YYYY-MM-DD');
-    const inicio = moment(existe.inicio).format('YYYY-MM-DD');
+    const inicio = moment(existe.inicio).format('YYYY-MM-DD ');
     const fin = moment(existe.final).format('YYYY-MM-DD');
-    console.log('fechas que manejo', verificar, inicio, fin);
+    // console.log('fechas que manejo', verificar, inicio, fin);
 
     if (verificar < inicio) {
       return false;

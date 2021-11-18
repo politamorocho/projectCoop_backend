@@ -192,6 +192,4 @@ export class BusService {
 
     return true;
   }
-
-  async;
 }

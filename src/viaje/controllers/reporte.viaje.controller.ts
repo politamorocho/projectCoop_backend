@@ -32,7 +32,7 @@ export class ReporteViajeController {
     }
   }
 
-  @Get('/porUsuario')
+  @Get('/pu')
   async viajesPorUsuario(
     @Res() response: Response,
     @Body() id: FiltroViajeDto,
@@ -51,7 +51,7 @@ export class ReporteViajeController {
     }
   }
 
-  @Get('/porFecha')
+  @Get('/pf')
   async viajesPorfecha(
     @Res() response: Response,
     @Body() params: FiltroFechaDto,
@@ -65,7 +65,7 @@ export class ReporteViajeController {
       });
     }
   }
-  @Get('/porRuta')
+  @Get('/pr')
   async viajesPorRuta(@Res() response: Response, @Body() id: FiltroViajeDto) {
     const data = await this.viajeService.viajesPorRuta(id);
 
@@ -77,7 +77,7 @@ export class ReporteViajeController {
     }
   }
 
-  @Get('/porUsuarioFecha')
+  @Get('/puf')
   async viajesPorusuarioFecha(
     @Res() response: Response,
     @Body() id: FiltroViajeDto,
@@ -93,7 +93,7 @@ export class ReporteViajeController {
     }
   }
 
-  @Get('/porRutaFecha')
+  @Get('/prf')
   async viajesPorRutaFecha(
     @Res() response: Response,
     @Body() id: FiltroViajeDto,
