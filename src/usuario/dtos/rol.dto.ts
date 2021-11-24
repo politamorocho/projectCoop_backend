@@ -12,7 +12,7 @@ import {
 
 export class CrearRolDto {
   @IsNotEmpty({ message: 'Debe ingresar un nombre válido' })
-  @IsString({ message: 'Debe ingresar un nombre válido' })
+  @IsString()
   nombre: string;
 
   @IsNotEmpty({ message: 'Debe ingresar una descripción válida' })

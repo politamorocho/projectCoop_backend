@@ -10,11 +10,11 @@ import {
 } from 'class-validator';
 
 export class CrearRutaDto {
-  @IsNotEmpty({ message: 'Debe ingresar lugar de origen para la ruta válido' })
+  @IsNotEmpty({ message: 'El campo no puede estar vacío' })
   @IsString({ message: 'Debe ingresar lugar de origen para la ruta válido' })
   origen: string;
 
-  @IsNotEmpty({ message: 'Debe ingresar lugar de destino para la ruta válido' })
+  @IsNotEmpty({ message: 'El campo no puede estar vacío' })
   @IsString({ message: 'Debe ingresar lugar de destino para la ruta válido' })
   destino: string;
 

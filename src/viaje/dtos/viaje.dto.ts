@@ -15,11 +15,11 @@ export class CrearViajeDto {
   @IsDate()
   fechaHoraSalida: Date;
 
-  @IsNotEmpty({ message: 'Debe ingresar un empleado válido' })
+  @IsNotEmpty({ message: 'El campo no puede estar vacío' })
   @IsMongoId({ message: 'Debe ingresar un empleado válido' })
   empleado1: string;
 
-  @IsNotEmpty({ message: 'Debe ingresar un tipo de empleado válido' })
+  @IsNotEmpty({ message: 'El campo no puede estar vacío' })
   @IsString({ message: 'Debe ingresar un tipo de empleado válido' })
   tipoEmpleado1: string;
 
@@ -31,11 +31,11 @@ export class CrearViajeDto {
   //@IsString({ message: 'Debe ingresar un tipo de empleado válido' })
   tipoEmpleado2: string;
 
-  @IsNotEmpty({ message: 'Debe ingresar un bus válido' })
+  @IsNotEmpty({ message: 'El campo no puede estar vacío' })
   @IsMongoId({ message: 'Debe ingresar un bus válido' })
   bus: string;
 
-  @IsNotEmpty({ message: 'Debe ingresar una ruta válida' })
+  @IsNotEmpty({ message: 'El campo no puede estar vacío' })
   @IsMongoId({ message: 'Debe ingresar una ruta válida' })
   ruta: string;
 }
@@ -49,11 +49,11 @@ export class FiltroViajeDto {
 }
 
 export class AgregarEmpleado2Dto {
-  @IsNotEmpty({ message: 'Debe ingresar un empleado válido' })
+  @IsNotEmpty({ message: 'El campo no puede estar vacio' })
   @IsMongoId({ message: 'Debe ingresar un empleado válido' })
   empleado2: string;
 
-  @IsOptional({ message: 'Debe ingresar un tipo de empleado válido' })
+  @IsNotEmpty({ message: 'El campo no puede estar vacio' })
   @IsString({ message: 'Debe ingresar un tipo de empleado válido' })
   tipoEmpleado2: string;
 }

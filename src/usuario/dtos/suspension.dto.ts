@@ -22,8 +22,8 @@ export class CrearSuspensionDto {
   @IsNotEmpty({ message: 'Debe ingresar una fecha válida' })
   final: Date;
 
-  @IsString({ message: 'Debe ingresar una descripción válida' })
   @IsNotEmpty({ message: 'Debe ingresar una descripción válida' })
+  @IsString()
   descripcion: string;
 
   @IsOptional()

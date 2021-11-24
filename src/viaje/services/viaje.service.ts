@@ -98,7 +98,7 @@ export class ViajeService {
     idAyudante: AgregarEmpleado2Dto,
   ) {
     const { id } = idViaje;
-    const { empleado2 } = idAyudante;
+    const { empleado2, tipoEmpleado2 } = idAyudante;
 
     const viaje = await this.viajeModel.findById({ _id: id });
     if (!viaje) {
@@ -107,16 +107,18 @@ export class ViajeService {
 
     //verificar que sea empleado activo
     const actEmp = await this.verificarActivoEmpleado(empleado2);
+
     if (!actEmp) {
-      throw new BadRequestException('El usuario seleccionado no es válido');
+      throw new BadRequestException('El empleado seleccionado no es válido');
     }
 
     //verificar que el ayudante no este registrado para este mismo viaje
-    if (viaje.empleado1 === actEmp._id) {
+    if (JSON.stringify(viaje.empleado1._id) === JSON.stringify(actEmp._id)) {
       throw new BadRequestException(
-        'No puede registrar 2 veces al mismo usuario para este viaje',
+        'No puede registrar 2 veces al mismo empleado para este viaje',
       );
     }
+
     //  const fecha = moment(viaje.fechaHoraSalida).format('YYYY-MM-DD');
 
     //verificar si el usuario tiene suspensiones activas al momento del viaje y guardar el id
@@ -129,7 +131,7 @@ export class ViajeService {
 
     const data = await this.viajeModel.findByIdAndUpdate(
       id,
-      { empleado2: empleado2 },
+      { empleado2: empleado2, tipoEmpleado2: tipoEmpleado2 },
       { new: true },
     );
 
@@ -183,38 +185,42 @@ export class ViajeService {
   // }
 
   //actualiza un viaje
-  async actualizar(idVi: FiltroViajeDto, viaje: ActualizarViajeDto) {
-    const { id } = idVi;
+  // async actualizar(idVi: FiltroViajeDto, viaje: ActualizarViajeDto) {
+  //   const { id } = idVi;
 
-    const existeId = await this.viajeModel.findOne({ _id: id });
+  //   const existeId = await this.viajeModel.findOne({ _id: id });
 
-    if (!existeId) {
-      throw new NotFoundException(
-        `No se puede actualizar porque no existe viaje con id: ${id}`,
-      );
-    }
+  //   if (!existeId) {
+  //     throw new NotFoundException(
+  //       `No se puede actualizar porque no existe viaje con id: ${id}`,
+  //     );
+  //   }
 
-    if (viaje.empleado1) {
-      const actEmp = await this.verificarActivoEmpleado(viaje.empleado1);
-      if (!actEmp) {
-        throw new BadRequestException('El usuario seleccionado no es válido');
-      }
-    }
+  //   if (viaje.empleado1) {
+  //     const actEmp = await this.verificarActivoEmpleado(viaje.empleado1);
+  //     if (!actEmp) {
+  //       throw new BadRequestException('El usuario seleccionado no es válido');
+  //     }
+  //   }
 
-    if (viaje.empleado2) {
-      const actEmpAyu = await this.verificarActivoEmpleado(viaje.empleado2);
-      if (!actEmpAyu) {
-        throw new BadRequestException('El usuario seleccionado no es válido');
-      }
-    }
-    const data = await this.viajeModel.findByIdAndUpdate(
-      id,
-      { $set: viaje },
-      { new: true },
-    );
-    return data;
-  }
+  //   if (viaje.empleado2) {
+  //     const actEmpAyu = await this.verificarActivoEmpleado(viaje.empleado2);
+  //     if (!actEmpAyu) {
+  //       throw new BadRequestException('El usuario seleccionado no es válido');
+  //     }
+  //   }
+  //   const data = await this.viajeModel.findByIdAndUpdate(
+  //     id,
+  //     { $set: viaje },
+  //     { new: true },
+  //   );
 
+  //   data.fechaHoraSalida = new Date();
+  //   data.save();
+  //   return data;
+  // }
+
+  //*********************************************/
   //**REPORTES** */
   //muestra los viajes de un usuario id
   async viajePorUsuario(idUs: FiltroViajeDto) {
@@ -282,6 +288,7 @@ export class ViajeService {
   }
 
   //****TERMINAN LOS SERVICIOS DE REPORTES** */
+  //*************************************************/
 
   async verificarActivoEmpleado(id: string) {
     //verificar que el usuario Chofer exista y este activo en db
@@ -294,7 +301,7 @@ export class ViajeService {
     const usChofActivo = await this.usuarioService.estadoActivoPorId(id);
 
     if (!usChofActivo) {
-      throw new BadRequestException('No es usuario empleado activo');
+      throw new BadRequestException('No es un empleado activo');
     }
 
     //verifica que tenga un rol empleado

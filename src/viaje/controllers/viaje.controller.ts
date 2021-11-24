@@ -59,21 +59,21 @@ export class ViajeController {
     }
   }
 
-  @Put()
-  async actualizar(
-    @Query() id: FiltroViajeDto,
-    @Body() viaje: ActualizarViajeDto,
-    @Res() response: Response,
-  ) {
-    const data = await this.viajeService.actualizar(id, viaje);
+  // @Put()
+  // async actualizar(
+  //   @Query() id: FiltroViajeDto,
+  //   @Body() viaje: ActualizarViajeDto,
+  //   @Res() response: Response,
+  // ) {
+  //   const data = await this.viajeService.actualizar(id, viaje);
 
-    if (data) {
-      response.status(HttpStatus.OK).json({
-        msg: 'Viaje Actualizado',
-        data,
-      });
-    }
-  }
+  //   if (data) {
+  //     response.status(HttpStatus.OK).json({
+  //       msg: 'Viaje Actualizado',
+  //       data,
+  //     });
+  //   }
+  // }
 
   // @Delete()
   // async eliminar(@Query() id: FiltroViajeDto, @Res() response: Response) {

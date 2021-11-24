@@ -32,6 +32,7 @@ export class Viaje extends Document {
   tipoEmpleado1: string;
 
   @Prop({
+    require: false,
     type: mongoose.Schema.Types.ObjectId,
     ref: Usuario.name,
     autopopulate: {
@@ -39,7 +40,7 @@ export class Viaje extends Document {
         ' -claveUsuario -__v -rol -codigoRecuperacion -codigoRecuperacionExpira -tipo',
     },
   })
-  empleado2: Usuario | Types.ObjectId;
+  empleado2: string | Usuario | Types.ObjectId;
 
   @Prop()
   tipoEmpleado2: string;

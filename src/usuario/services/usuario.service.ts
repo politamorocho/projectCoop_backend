@@ -128,7 +128,7 @@ export class UsuarioService {
       throw new NotFoundException(`No existen coincidencias`);
     }
 
-    console.log(data);
+    // console.log(data);
     return data;
   }
 
@@ -159,7 +159,7 @@ export class UsuarioService {
     //si es un mongoid valido, verifica que exista
     const rolId = await this.rolService.verificaRolId(usuario.rol);
     if (!rolId) {
-      throw new BadRequestException(`El rol  ${usuario.rol} no existe`);
+      throw new BadRequestException(`El rol no existe`);
     }
 
     //pregunta si es un rol activo
@@ -191,7 +191,7 @@ export class UsuarioService {
 
     //pregunta si existe el id que llega, si no existe sale.
     if (!existeId) {
-      throw new NotFoundException(`El usuario con id: ${id} no existe`);
+      throw new NotFoundException(`El usuario no existe`);
     }
 
     //pregunta el estado del usuario que llega, si es false sale.
@@ -202,7 +202,7 @@ export class UsuarioService {
     // verifica si existe el correo, si es el mismo no hace nada
     //si es nuevo, verifica que no exista
     if (cambios.correo) {
-      if (cambios.correo != data.correo) {
+      if (cambios.correo !== data.correo) {
         const correoExiste = await this.usuarioModel.findOne({
           correo: cambios.correo,
         });
@@ -226,14 +226,14 @@ export class UsuarioService {
             `La cedula ${cedulaExiste.cedula} ya existe`,
           );
         }
-        console.log('Aqui debe llegar la ceudla');
+       // console.log('Aqui debe llegar la ceudla');
       }
     }
 
     //verifica el id de rol que sea valido
     if (cambios.rol) {
       if (!isMongoId(cambios.rol)) {
-        throw new BadRequestException(`Rl rol no es válido`);
+        throw new BadRequestException(`El rol no es válido`);
       }
 
       //si es un mongoid valido, verifica que exista
@@ -254,7 +254,7 @@ export class UsuarioService {
     const actualizado = await this.usuarioModel.findByIdAndUpdate(id, data, {
       new: true,
     });
-    console.log('actualizaado', actualizado);
+    //console.log('actualizaado', actualizado);
 
     return actualizado;
   }
@@ -278,8 +278,8 @@ export class UsuarioService {
       throw new BadRequestException('Los claves introducidos no coinciden');
     }
 
-    const salt = await bcryptjs.genSaltSync(10);
-    const nueva = await bcryptjs.hashSync(claveNueva, salt);
+    const salt = bcryptjs.genSaltSync(10);
+    const nueva = bcryptjs.hashSync(claveNueva, salt);
 
     const actualizado = await this.usuarioModel.findByIdAndUpdate(
       id,
@@ -378,7 +378,7 @@ export class UsuarioService {
       codigoRecuperacion: codigo,
     });
     if (!codigoExiste) {
-      throw new NotFoundException('El código ingresado no coincide ');
+      throw new NotFoundException('El código ingresado no coincide');
     }
 
     const aTiempo = await this.verificarCaducidadCodigo(codigo);
