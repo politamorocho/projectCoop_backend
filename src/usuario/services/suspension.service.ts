@@ -43,13 +43,14 @@ export class SuspensionService {
       throw new BadRequestException('El usuario está inactivo');
     }
 
+    suspension.descripcion = this.cambiarMinusculas(suspension.descripcion);
     const existeId = await new this.suspensionModel(suspension).save();
 
     //this.inactivarSuspension(existeId._id);
     return existeId;
   }
 
-  //inactivar automaticamente la suspension cuando se cumpla la fecha final
+  //inactivar automaticamente la suspension cuando se cumpla la fecha final, no se usa
   async inactivarSuspension(id: string) {
     const existeId = await this.suspensionModel.findById({ _id: id });
 
@@ -197,6 +198,7 @@ export class SuspensionService {
       }
     }
 
+    susActual.descripcion = this.cambiarMinusculas(susActual.descripcion);
     const data = await this.suspensionModel.findByIdAndUpdate(
       id,
       { $set: susActual },
@@ -217,7 +219,7 @@ export class SuspensionService {
     const verificar = moment(fecha).format('YYYY-MM-DD');
     const inicio = moment(existe.inicio).format('YYYY-MM-DD ');
     const fin = moment(existe.final).format('YYYY-MM-DD');
-    // console.log('fechas que manejo', verificar, inicio, fin);
+    //  console.log('fechas que manejo', verificar, inicio, fin);
 
     if (verificar < inicio) {
       return false;
@@ -227,11 +229,17 @@ export class SuspensionService {
     }
 
     if (verificar == inicio || verificar == fin) {
+      console.log(existe);
       return existe;
     }
 
     if (verificar > inicio && verificar < fin) {
       return existe;
     }
+  }
+
+  cambiarMinusculas(palabra: string) {
+    const nueva = palabra.toLowerCase();
+    return nueva;
   }
 }

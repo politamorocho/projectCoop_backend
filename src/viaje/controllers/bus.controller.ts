@@ -113,6 +113,16 @@ export class BusController {
     }
   }
 
+  @Put('/h')
+  async habilitar(@Query() id: IdBusDto, @Res() response: Response) {
+    const data = await this.busService.habilitar(id);
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Bus habilitado con éxito',
+      });
+    }
+  }
+
   @Delete()
   async eliminar(@Query() id: IdBusDto, @Res() response: Response) {
     const data = await this.busService.eliminar(id);

@@ -140,6 +140,16 @@ export class UsuarioController {
     }
   }
 
+  @Delete()
+  async eliminar(@Query() id: IdDto, @Res() response: Response) {
+    const data = await this.usuarioService.eliminar(id);
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Usuario eliminado con exito',
+      });
+    }
+  }
+
   @Put()
   async actualizar(
     @Query() id: IdDto,
@@ -155,12 +165,12 @@ export class UsuarioController {
     }
   }
 
-  @Delete()
-  async eliminar(@Query() id: IdDto, @Res() response: Response) {
-    const data = await this.usuarioService.eliminar(id);
+  @Put('/h')
+  async habilitar(@Query() id: IdDto, @Res() response: Response) {
+    const data = await this.usuarioService.habilitar(id);
     if (data) {
       response.status(HttpStatus.OK).json({
-        msg: 'Usuario eliminado con exito',
+        msg: 'Usuario habilitado con exito',
       });
     }
   }
@@ -179,7 +189,7 @@ export class UsuarioController {
     }
   }
 
-  //envia el codigo de verifiacion de segurirdad para fijar nueva clave
+  //envia el codigo de verificacion de segurirdad para fijar nueva clave
   @Post('/ec')
   async enviarCodigoRecuperacion(
     @Body() correo: RecuperarClaveDto,

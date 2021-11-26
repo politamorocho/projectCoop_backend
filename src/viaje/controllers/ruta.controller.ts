@@ -31,7 +31,7 @@ export class RutaController {
     const data = await this.rutaService.crearRuta(ruta);
     if (data) {
       response.status(HttpStatus.OK).json({
-        msg: 'bus creado',
+        msg: 'Ruta creado',
         data: data,
       });
     }
@@ -114,6 +114,16 @@ export class RutaController {
       response.status(HttpStatus.OK).json({
         msg: 'Ruta actualizada con exito',
         data,
+      });
+    }
+  }
+
+  @Put('/h')
+  async habilitar(@Query() id: IdRutaDto, @Res() response: Response) {
+    const data = await this.rutaService.habilitar(id);
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Ruta habilitada con exito',
       });
     }
   }

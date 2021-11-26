@@ -22,7 +22,10 @@ export class BusService {
   //crear un bus
   async crearBus(bus: CrearBusDto) {
     //  console.log('esta llegando ', bus);
-    const existePlaca = await this.busModel.findOne({ placa: bus.placa });
+    const placaMin = this.cambiarMinusculas(bus.placa);
+    const existePlaca = await this.busModel.findOne({
+      placa: placaMin,
+    });
 
     if (existePlaca) {
       throw new BadRequestException(`El bus con placa: ${bus.placa} ya existe`);
@@ -37,9 +40,9 @@ export class BusService {
       );
     }
 
+    bus.placa = placaMin;
     const data = await new this.busModel(bus).save();
 
-    console.log('data', data);
     return data;
   }
 
@@ -124,10 +127,12 @@ export class BusService {
       );
     }
 
+    const placaMin = this.cambiarMinusculas(busAct.placa);
+
     if (busAct.placa) {
       if (busAct.placa !== existeId.placa) {
         const existePlaca = await this.busModel.findOne({
-          placa: busAct.placa,
+          placa: placaMin,
         });
         if (existePlaca) {
           throw new BadRequestException(
@@ -149,7 +154,7 @@ export class BusService {
         }
       }
     }
-
+    busAct.placa = placaMin;
     const data = await this.busModel.findByIdAndUpdate(
       id,
       { $set: busAct },
@@ -179,6 +184,22 @@ export class BusService {
     return data;
   }
 
+  async habilitar(idBus: IdBusDto) {
+    const { id } = idBus;
+    const siExiste = await this.busModel.findById({ _id: id });
+    if (!siExiste) {
+      throw new NotFoundException('El bus no existe');
+    }
+
+    const data = await this.busModel.findByIdAndUpdate(
+      id,
+      { estado: true },
+      { new: true },
+    );
+
+    return data;
+  }
+
   async existeBusActivoId(id: string) {
     const siExiste = await this.busModel.findById({ _id: id });
 
@@ -191,5 +212,10 @@ export class BusService {
     }
 
     return true;
+  }
+
+  cambiarMinusculas(palabra: string) {
+    const nueva = palabra.toLowerCase();
+    return nueva;
   }
 }

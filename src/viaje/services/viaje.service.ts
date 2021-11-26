@@ -48,7 +48,8 @@ export class ViajeService {
 
     //verificar que el bus exista y este activo
 
-    if (!(await this.busService.existeBusActivoId(viaje.bus))) {
+    const busVerificar = await this.busService.existeBusActivoId(viaje.bus);
+    if (!busVerificar) {
       throw new BadRequestException('No existe el bus');
     }
 
@@ -59,6 +60,53 @@ export class ViajeService {
     }
 
     //preguntar si el usuario que llega no está de viaje ya.
+    // const hoy = new Date(Date.now());
+    // const hora1 = hoy.getHours();
+    // console.log(hoy);
+
+    // const dia = moment(hoy).format('YYYY-MM-DD');
+    // console
+    // const hora11 = moment(hoy).format('HH:mm');
+    // const tiempo = moment(hora11).diff(rutaVerificar.duracionAprox, 'hours');
+
+    // const tiempo2 = moment(tiempo).format('HH:mm');
+
+    // const aGuardar = `${dia} ${tiempo2}`;
+    // const fecha2 = new Date(aGuardar);
+    // console.log(fecha2, 'la fecha2');
+    // const hora = fecha2.getHours();
+    // console.log(hora);
+    // const restar = hora1 - hora;
+    // console.log(restar, 'la resta');
+    // const busDeViaje = await this.viajeModel.find({
+    //   bus: viaje.bus,
+    //   $expr: {
+    //     // la siguiente es una expresión de agregación
+    //     $and: [
+    //       // indica que cada comparación entre elementos del array se debe satisfacer
+    //       { $eq: [{ $year: '$fechaHoraSalida' }, { $year: hoy }] }, // devuelve true si se cumple la igualdad de loss elementos
+    //       { $eq: [{ $month: '$fechaHoraSalida' }, { $month: hoy }] },
+    //       { $eq: [{ $dayOfMonth: '$fechaHoraSalida' }, { $dayOfMonth: hoy }] },
+    //       {
+    //         $eq: [
+    //           { $hour: '$fechaHoraSalida' },
+    //           {
+    //             $hour: {
+    //               $gte: { $hour: hoy },
+    //               $lte: { $hour: hoy },
+    //             },
+    //           },
+    //         ],
+    //       },
+    //     ],
+    //   },
+    // });
+
+    // if (busDeViaje) {
+    //   console.log('holi');
+    //   console.log(busDeViaje);
+    // }
+
     const existeEmpleadoDeViaje = await this.viajeModel.find({
       $or: [{ empleado1: viaje.empleado1 }, { empleado2: viaje.empleado1 }],
     });
@@ -305,7 +353,7 @@ export class ViajeService {
     }
 
     //verifica que tenga un rol empleado
-    if (!(await this.rolService.esRolEmpleado(usChofer.rol._id))) {
+    if (!(await this.rolService.esRolSecretaria2(usChofer.rol._id))) {
       throw new BadRequestException('No es un usuario empleado');
     }
 

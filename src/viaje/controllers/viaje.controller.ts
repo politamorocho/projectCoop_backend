@@ -59,6 +59,18 @@ export class ViajeController {
     }
   }
 
+  @Get()
+  async listar(@Res() response: Response) {
+    const data = await this.viajeService.listarTodo();
+
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Lista  de  viajes',
+        data,
+      });
+    }
+  }
+
   // @Put()
   // async actualizar(
   //   @Query() id: FiltroViajeDto,

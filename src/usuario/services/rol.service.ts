@@ -21,8 +21,10 @@ export class RolService {
 
   //crea un rol nuevo
   async crearRol(rol: CrearRolDto) {
+    const nombreMin = this.cambiarMinusculas(rol.nombre);
+    const desMin = this.cambiarMinusculas(rol.descripcion);
     const rolExiste = await this.rolModel.findOne({
-      nombre: rol.nombre,
+      nombre: nombreMin,
     });
 
     //si existe no se crea
@@ -31,6 +33,8 @@ export class RolService {
     }
 
     //si no existe lo crea
+    rol.nombre = nombreMin;
+    rol.descripcion = desMin;
     const data = await new this.rolModel(rol).save();
 
     return data;
@@ -86,6 +90,9 @@ export class RolService {
   //actualiza un rol seleccinado por id, enviado por query
   async actualizar(query: IdRolDto, rol: ActualizarRolDto) {
     const { id } = query;
+    const nombreMin = this.cambiarMinusculas(rol.nombre);
+    const desMin = this.cambiarMinusculas(rol.descripcion);
+
     const existeId = await this.rolModel.findOne({ _id: id });
 
     if (!existeId) {
@@ -96,6 +103,13 @@ export class RolService {
       throw new BadRequestException(`No se puede actualizar el rol`);
     }
 
+    const nombreExis = await this.rolModel.findOne({ nombre: nombreMin });
+    if (nombreExis) {
+      throw new BadRequestException(`El nombre ${nombreMin} ya existe`);
+    }
+
+    rol.nombre = nombreMin;
+    rol.descripcion = desMin;
     const data = await this.rolModel.findByIdAndUpdate(
       id,
       { $set: rol },
@@ -116,13 +130,32 @@ export class RolService {
     }
 
     if (!existeId.estado) {
-      throw new BadRequestException(
-        `No se puede eliminar porque no existe el rol`,
-      );
+      throw new BadRequestException(`No se puede eliminar`);
     }
     const data = await this.rolModel.findByIdAndUpdate(
       id,
       { estado: false },
+      { new: true },
+    );
+    return data;
+  }
+
+  async habilitar(query: IdRolDto) {
+    const { id } = query;
+    const existeId = await this.rolModel.findOne({ _id: id });
+
+    if (!existeId) {
+      throw new NotFoundException(
+        `No se puede habilitar porque no existe el rol`,
+      );
+    }
+
+    if (existeId.estado) {
+      throw new BadRequestException(`El rol ya está habilitado`);
+    }
+    const data = await this.rolModel.findByIdAndUpdate(
+      id,
+      { estado: true },
       { new: true },
     );
     return data;
@@ -149,14 +182,17 @@ export class RolService {
     return true; //|| rolExiste;
   }
 
-  async esRolEmpleado(idRol: string) {
-    const data = await this.rolModel.findById({ _id: idRol });
+  //si es secretaria no puede viajar.
+  async esRolSecretaria2(idRol: string) {
+    const data = await this.rolModel.findById({ _id: idRol, estado: true });
     const nombre = data.nombre;
 
     // const emp: string = 'empleado';
-    const emp: string = `${process.env.ROL_VIAJE}`;
-    if (nombre.toLowerCase() !== emp.toLowerCase()) {
-      throw new BadRequestException('El usuario no tiene el rol de empleado');
+    const emp: string = `${process.env.ROL_CORREO_2}`;
+    if (nombre.toLowerCase() == emp.toLowerCase()) {
+      throw new BadRequestException(
+        `El usuario tiene rol ${process.env.ROL_CORREO_2} no puede ir de viaje`,
+      );
     }
 
     return true;
@@ -166,7 +202,7 @@ export class RolService {
     //var entorno
     const sec = `${process.env.ROL_CORREO_2}`;
 
-    const data = await this.rolModel.findOne({ nombre: sec });
+    const data = await this.rolModel.findOne({ nombre: sec, estado: true });
     if (!data) {
       return false;
     }
@@ -175,7 +211,7 @@ export class RolService {
 
   async esRolAdministrador() {
     const adm = `${process.env.ROL_CORREO_1}`;
-    const data = await this.rolModel.findOne({ nombre: adm });
+    const data = await this.rolModel.findOne({ nombre: adm, estado: true });
     // if (!data) {
     //   return false;
     // }
@@ -185,11 +221,16 @@ export class RolService {
   async esRolEmpleado2() {
     const emp = `${process.env.ROL_VIAJE}`;
     console.log('emple', emp);
-    const data = await this.rolModel.findOne({ nombre: emp });
+    const data = await this.rolModel.findOne({ nombre: emp, estado: true });
     if (!data) {
       return false;
     }
 
     return data;
+  }
+
+  cambiarMinusculas(palabra: string) {
+    const nueva = palabra.toLowerCase();
+    return nueva;
   }
 }

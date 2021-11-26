@@ -64,10 +64,7 @@ export class UsuarioService {
   //muestra la info de un usuario activo enviado por el query
   async mostrarUno(idUs: IdDto) {
     const { id } = idUs;
-    const data = await this.usuarioModel
-      .findOne({ _id: id })
-
-      .exec();
+    const data = await this.usuarioModel.findOne({ _id: id }).exec();
     if (!data) {
       return false;
     }
@@ -147,6 +144,7 @@ export class UsuarioService {
         );
       }
     }
+
     const cedulaExiste = await this.usuarioModel.findOne({
       cedula: usuario.cedula,
     });
@@ -175,7 +173,10 @@ export class UsuarioService {
       const salt = bcryptjs.genSaltSync(10);
       usuario.claveUsuario = bcryptjs.hashSync(usuario.claveUsuario, salt);
     }
+
     //guardar en bd
+    usuario.nombre = this.cambiarMinusculas(usuario.nombre);
+    usuario.apellido = this.cambiarMinusculas(usuario.apellido);
     const data = await new this.usuarioModel(usuario).save();
 
     return data;
@@ -226,7 +227,7 @@ export class UsuarioService {
             `La cedula ${cedulaExiste.cedula} ya existe`,
           );
         }
-       // console.log('Aqui debe llegar la ceudla');
+        // console.log('Aqui debe llegar la ceudla');
       }
     }
 
@@ -251,12 +252,64 @@ export class UsuarioService {
       data.rol = mongoose.Types.ObjectId(cambios.rol);
     }
 
-    const actualizado = await this.usuarioModel.findByIdAndUpdate(id, data, {
-      new: true,
-    });
+    if (cambios.nombre) {
+      data.nombre = this.cambiarMinusculas(data.nombre);
+    }
+
+    if (cambios.apellido) {
+      data.apellido = this.cambiarMinusculas(data.apellido);
+    }
+
+    const actualizado = await this.usuarioModel.findByIdAndUpdate(
+      id,
+      { $set: data },
+      { new: true },
+    );
     //console.log('actualizaado', actualizado);
 
     return actualizado;
+  }
+
+  //eliminar un usuario
+  async eliminar(idUs: IdDto) {
+    const { id } = idUs;
+    const existeId = await this.usuarioModel.findOne({ _id: id });
+
+    if (!existeId) {
+      throw new NotFoundException(`El usuario no existe`);
+    }
+    if (!existeId.estado) {
+      throw new BadRequestException(`El usuario no está activo`);
+    }
+
+    const data = await this.usuarioModel.findByIdAndUpdate(
+      id,
+      { $set: { estado: false } },
+      { new: true },
+    );
+
+    return data;
+  }
+
+  //habilitar un usuario
+  async habilitar(idUs: IdDto) {
+    const { id } = idUs;
+    const existeId = await this.usuarioModel.findOne({ _id: id });
+
+    if (!existeId) {
+      throw new NotFoundException(`El usuario no existe`);
+    }
+    if (existeId.estado) {
+      throw new BadRequestException(`El usuario ya está activo`);
+    }
+
+    const data = await this.usuarioModel.findByIdAndUpdate(
+      id,
+      { $set: { estado: true } },
+      { new: true },
+    );
+
+    return data;
   }
 
   //para actualizar la clave
@@ -275,7 +328,7 @@ export class UsuarioService {
     );
 
     if (!siCoincide) {
-      throw new BadRequestException('Los claves introducidos no coinciden');
+      throw new BadRequestException('Las claves introducidas no coinciden');
     }
 
     const salt = bcryptjs.genSaltSync(10);
@@ -287,27 +340,6 @@ export class UsuarioService {
       { new: true },
     );
     return true;
-  }
-
-  //eliminar un usuario
-  async eliminar(idUs: IdDto) {
-    const { id } = idUs;
-    const existeId = await this.usuarioModel.findOne({ _id: id });
-
-    if (!existeId) {
-      throw new NotFoundException(`El usuario no existe`);
-    }
-    if (!existeId.estado) {
-      throw new BadRequestException(`El usuario no está activo`);
-    }
-
-    const data = await this.usuarioModel.findByIdAndUpdate(
-      id,
-      { estado: false },
-      { new: true },
-    );
-
-    return data;
   }
 
   //recuperar claveUsuario por codigo enviado al correo
@@ -487,5 +519,10 @@ export class UsuarioService {
       return false;
     }
     return adm;
+  }
+
+  cambiarMinusculas(palabra: string) {
+    const nueva = palabra.toLowerCase();
+    return nueva;
   }
 }

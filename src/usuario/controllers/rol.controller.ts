@@ -120,6 +120,16 @@ export class RolController {
     }
   }
 
+  @Put('/h')
+  async habilitar(@Query() id: IdRolDto, @Res() response: Response) {
+    const data = await this.rolService.habilitar(id);
+    if (data) {
+      response.status(HttpStatus.OK).json({
+        msg: 'Rol habilitado con exito',
+      });
+    }
+  }
+
   @Delete()
   async eliminar(@Query() id: IdRolDto, @Res() response: Response) {
     const data = await this.rolService.eliminar(id);
