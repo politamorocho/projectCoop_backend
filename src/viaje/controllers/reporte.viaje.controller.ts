@@ -15,7 +15,8 @@ import { SecGuard } from 'src/auth/guards/secretaria.guard';
 import { AdmGuard } from 'src/auth/guards/admin.guard';
 import { FiltroFechaDto } from '../../usuario/dtos/suspension.dto';
 
-//@UseGuards(JwtAuthGuard, SecGuard, AdmGuard)
+@UseGuards(JwtAuthGuard)
+//@UseGuards( SecGuard, AdmGuard)
 @Controller('reporte')
 export class ReporteViajeController {
   constructor(private viajeService: ViajeService) {}

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Model, FilterQuery } from 'mongoose';
 import * as moment from 'moment';
+
 const mongoose = require('mongoose');
 import { InjectModel } from '@nestjs/mongoose';
 import { Db } from 'mongodb';
@@ -40,7 +41,6 @@ export class ViajeService {
   //crear un viaje
   async crearViaje(viaje: CrearViajeDto) {
     //verificar que el usuario Chofer exista y este activo en db
-
     const actEmp = await this.verificarActivoEmpleado(viaje.empleado1);
     if (!actEmp) {
       throw new BadRequestException('El usuario seleccionado no es válido');
@@ -60,56 +60,56 @@ export class ViajeService {
     }
 
     //preguntar si el usuario que llega no está de viaje ya.
-    // const hoy = new Date(Date.now());
-    // const hora1 = hoy.getHours();
-    // console.log(hoy);
+    const hoy = new Date(Date.now());
 
-    // const dia = moment(hoy).format('YYYY-MM-DD');
-    // console
-    // const hora11 = moment(hoy).format('HH:mm');
-    // const tiempo = moment(hora11).diff(rutaVerificar.duracionAprox, 'hours');
+    // const tiempoVerificar = moment(hoy)
+    //   .subtract(rutaVerificar.duracionAprox, 'hours')
+    //   .format('YYYY-MM-DDTHH:mm');
+    // const fechaVerificar = new Date(tiempoVerificar);
 
-    // const tiempo2 = moment(tiempo).format('HH:mm');
-
-    // const aGuardar = `${dia} ${tiempo2}`;
-    // const fecha2 = new Date(aGuardar);
-    // console.log(fecha2, 'la fecha2');
-    // const hora = fecha2.getHours();
-    // console.log(hora);
-    // const restar = hora1 - hora;
-    // console.log(restar, 'la resta');
-    // const busDeViaje = await this.viajeModel.find({
-    //   bus: viaje.bus,
-    //   $expr: {
-    //     // la siguiente es una expresión de agregación
-    //     $and: [
-    //       // indica que cada comparación entre elementos del array se debe satisfacer
-    //       { $eq: [{ $year: '$fechaHoraSalida' }, { $year: hoy }] }, // devuelve true si se cumple la igualdad de loss elementos
-    //       { $eq: [{ $month: '$fechaHoraSalida' }, { $month: hoy }] },
-    //       { $eq: [{ $dayOfMonth: '$fechaHoraSalida' }, { $dayOfMonth: hoy }] },
-    //       {
-    //         $eq: [
-    //           { $hour: '$fechaHoraSalida' },
-    //           {
-    //             $hour: {
-    //               $gte: { $hour: hoy },
-    //               $lte: { $hour: hoy },
-    //             },
-    //           },
-    //         ],
-    //       },
-    //     ],
-    //   },
-    // });
-
-    // if (busDeViaje) {
-    //   console.log('holi');
-    //   console.log(busDeViaje);
-    // }
-
-    const existeEmpleadoDeViaje = await this.viajeModel.find({
-      $or: [{ empleado1: viaje.empleado1 }, { empleado2: viaje.empleado1 }],
+    const busDeViaje = await this.viajeModel.findOne({
+      bus: viaje.bus,
+      $expr: {
+        // la siguiente es una expresión de agregación
+        $and: [
+          // indica que cada comparación entre elementos del array se debe satisfacer
+          { $eq: [{ $year: '$fechaHoraSalida' }, { $year: hoy }] }, // devuelve true si se cumple la igualdad de loss elementos
+          { $eq: [{ $month: '$fechaHoraSalida' }, { $month: hoy }] },
+          { $eq: [{ $dayOfMonth: '$fechaHoraSalida' }, { $dayOfMonth: hoy }] },
+        ],
+      },
     });
+
+    if (busDeViaje) {
+      if (busDeViaje.fechaHoraLlegadaAprox > hoy) {
+        throw new BadRequestException(
+          `El bus elegido no puede salir de viaje aun`,
+        );
+      }
+    }
+
+    const empleadoDeViaje = await this.viajeModel.findOne({
+      $expr: {
+        // la siguiente es una expresión de agregación
+        $and: [
+          // indica que cada comparación entre elementos del array se debe satisfacer
+          {
+            $or: [
+              { empleado1: viaje.empleado1 },
+              { empleado2: viaje.empleado1 },
+            ],
+          },
+          { $eq: [{ $year: '$fechaHoraSalida' }, { $year: hoy }] }, // devuelve true si se cumple la igualdad de loss elementos
+          { $eq: [{ $month: '$fechaHoraSalida' }, { $month: hoy }] },
+          { $eq: [{ $dayOfMonth: '$fechaHoraSalida' }, { $dayOfMonth: hoy }] },
+          { $gte: ['$fechaHoraLlegadaAprox', hoy] },
+        ],
+      },
+    });
+
+    if (empleadoDeViaje) {
+      throw new BadRequestException(`El empleado no puede salir de viaje aun`);
+    }
 
     const data = await new this.viajeModel(viaje).save();
 
@@ -165,6 +165,29 @@ export class ViajeService {
       throw new BadRequestException(
         'No puede registrar 2 veces al mismo empleado para este viaje',
       );
+    }
+
+    //verificar si el empleado 2 esta de viaje
+    const hoy = viaje.fechaHoraSalida;
+    console.log(hoy);
+    const empleadoDeViaje = await this.viajeModel.findOne({
+      $or: [{ empleado1: empleado2 }, { empleado2: empleado2 }],
+      $expr: {
+        // la siguiente es una expresión de agregación
+        $and: [
+          // indica que cada comparación entre elementos del array se debe satisfacer
+
+          { $eq: [{ $year: '$fechaHoraSalida' }, { $year: hoy }] }, // devuelve true si se cumple la igualdad de loss elementos
+          { $eq: [{ $month: '$fechaHoraSalida' }, { $month: hoy }] },
+          { $eq: [{ $dayOfMonth: '$fechaHoraSalida' }, { $dayOfMonth: hoy }] },
+          { $gte: ['$fechaHoraLlegadaAprox', hoy] },
+        ],
+      },
+    });
+
+    console.log(empleadoDeViaje);
+    if (empleadoDeViaje) {
+      throw new BadRequestException(`El empleado no puede salir de viaje aun`);
     }
 
     //  const fecha = moment(viaje.fechaHoraSalida).format('YYYY-MM-DD');

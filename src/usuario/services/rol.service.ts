@@ -103,9 +103,13 @@ export class RolService {
       throw new BadRequestException(`No se puede actualizar el rol`);
     }
 
-    const nombreExis = await this.rolModel.findOne({ nombre: nombreMin });
-    if (nombreExis) {
-      throw new BadRequestException(`El nombre ${nombreMin} ya existe`);
+    if (rol.nombre) {
+      if (nombreMin !== existeId.nombre) {
+        const nombreExis = await this.rolModel.findOne({ nombre: nombreMin });
+        if (nombreExis) {
+          throw new BadRequestException(`El nombre ${nombreMin} ya existe`);
+        }
+      }
     }
 
     rol.nombre = nombreMin;

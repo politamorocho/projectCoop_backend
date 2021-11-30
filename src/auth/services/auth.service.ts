@@ -29,6 +29,7 @@ export class AuthService {
   async generarJWT(usuario: Usuario) {
     const payload = { sub: usuario._id, rol: usuario.rol._id };
     return {
+      usuario,
       access_token: await this.jwtService.sign(payload),
     };
   }

@@ -8,6 +8,7 @@ import {
   Query,
   Body,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
@@ -17,7 +18,10 @@ import {
   AgregarEmpleado2Dto,
 } from '../dtos/viaje.dto';
 import { ViajeService } from '../services/viaje.service';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
+//@UseGuards( SecGuard)
 @Controller('viaje')
 export class ViajeController {
   constructor(private viajeService: ViajeService) {}

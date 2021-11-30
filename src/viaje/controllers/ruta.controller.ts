@@ -21,7 +21,8 @@ import {
   IdRutaDto,
 } from '../dtos/ruta.dto';
 
-//@UseGuards(JwtAuthGuard, SecGuard)
+@UseGuards(JwtAuthGuard)
+//@UseGuards( SecGuard)
 @Controller('ruta')
 export class RutaController {
   constructor(private rutaService: RutaService) {}
