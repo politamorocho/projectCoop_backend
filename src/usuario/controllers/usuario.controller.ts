@@ -35,7 +35,7 @@ import { Rol } from '../entities/rol.entity';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
-@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard)
 //@UseGuards( SecGuard)
 @Controller('usuario')
 export class UsuarioController {

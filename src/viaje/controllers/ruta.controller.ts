@@ -21,7 +21,7 @@ import {
   IdRutaDto,
 } from '../dtos/ruta.dto';
 
-@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard)
 //@UseGuards( SecGuard)
 @Controller('ruta')
 export class RutaController {

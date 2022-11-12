@@ -23,7 +23,7 @@ import { BusService } from '../services/bus.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { SecGuard } from 'src/auth/guards/secretaria.guard';
 
-@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard)
 //@UseGuards( SecGuard)
 @Controller('bus')
 export class BusController {

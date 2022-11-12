@@ -22,7 +22,7 @@ import {
 import { IdDto } from '../dtos/usuario.dto';
 import { SuspensionService } from '../services/suspension.service';
 
-@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard)
 //@UseGuards( SecGuard)
 @Controller('suspension')
 export class SuspensionController {

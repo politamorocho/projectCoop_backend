@@ -20,7 +20,7 @@ import {
 import { ViajeService } from '../services/viaje.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
-@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard)
 //@UseGuards( SecGuard)
 @Controller('viaje')
 export class ViajeController {
